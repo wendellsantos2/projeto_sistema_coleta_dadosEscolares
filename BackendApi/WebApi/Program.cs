@@ -18,7 +18,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => 
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Coleta Escolar v1");
+        c.RoutePrefix = string.Empty; // Abre o Swagger na raiz (localhost)
+    });
 }
 
 app.UseHttpsRedirection();
