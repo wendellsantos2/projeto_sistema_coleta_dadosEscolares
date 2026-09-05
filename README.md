@@ -74,10 +74,14 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 
 ## ⚙️ 5. Instruções para Execução (Ambiente de Desenvolvimento)
 
-### 5.1 Configuração do Banco de Dados
-1. Certifique-se de possuir o PostgreSQL instalado.
-2. Crie um banco de dados: `CREATE DATABASE coleta_escolar;`
-3. Execute o script contido na pasta `database/` ou deixe o Entity Framework (Infrastructure) criar as tabelas baseadas no Domínio.
+### 5.1 Configuração do Banco de Dados (via Docker)
+Para simplificar o ambiente, providenciamos um arquivo `docker-compose.yml` que já sobe o PostgreSQL com as tabelas criadas automaticamente através de um script de inicialização:
+1. Certifique-se de ter o Docker e o Docker Compose instalados.
+2. Na raiz do projeto, execute o comando:
+   ```bash
+   docker-compose up -d
+   ```
+3. O banco estará disponível na porta `5432` com o usuário `postgres`, senha `password` e o banco de dados `coleta_escolar` já estruturado!
 
 ### 5.2 Execução do Backend (API .NET com DDD)
 *(Instruções a serem detalhadas após a criação do código)*
