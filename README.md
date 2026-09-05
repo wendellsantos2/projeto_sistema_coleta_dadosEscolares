@@ -10,16 +10,20 @@ O projeto foi projetado com um foco rigoroso em **escalabilidade**, **resiliênc
 
 Para garantir que o projeto possa escalar desde um colégio comunitário até uma rede inteira de escolas públicas ou privadas, adotamos uma arquitetura orientada a serviços com foco na nuvem (Cloud-Native) e resiliência no lado do cliente.
 
+Para o **Backend em .NET**, adotamos os princípios do **Domain-Driven Design (DDD)** e arquitetura limpa (Clean Architecture). Isso garante que o núcleo das regras de negócio seja completamente isolado de tecnologias de banco de dados ou da interface (API).
+
 ### Fluxo de Informações
 ```mermaid
 graph LR
-    A[Mobile App offline-first] -->|Sincronização Lote| B(API RESTful Backend)
-    B -->|Gravação/Leitura| C[(PostgreSQL)]
-    D[Web Dashboard] -->|Consultas/Indicadores| B
+    A[Mobile App offline-first] -->|Sincronização Lote| B(API RESTful .NET - Camada de Apresentação)
+    B -->|Casos de Uso| C(Camada de Aplicação / Domínio)
+    C -->|Repositórios| D(Camada de Infraestrutura)
+    D -->|Gravação/Leitura| E[(PostgreSQL)]
+    F[Web Dashboard Angular] -->|Consultas/Indicadores| B
 ```
 
 *   **Mobile App (Coletor):** Trabalha de forma autônoma (offline). Todos os dados são armazenados em um banco local e enviados para o servidor de forma assíncrona assim que houver conectividade. O controle é feito através de **UUIDs**.
-*   **Backend (API REST):** Atua como o "cérebro" da aplicação, validando entradas e garantindo que não existam dados duplicados.
+*   **Backend (API .NET com DDD):** Atua como o "cérebro" da aplicação. O núcleo do Domínio garante a validação e consistência, enquanto a Infraestrutura persiste no PostgreSQL.
 *   **Web Dashboard:** Aplicação SPA (Single Page Application) focada em consumir dados agregados do backend para plotagem de gráficos em tempo real.
 
 ---
@@ -31,7 +35,7 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 | Componente | Tecnologia Escolhida | Justificativa |
 | :--- | :--- | :--- |
 | **Banco de Dados** | `PostgreSQL` | Relacional, excelente performance, suporte nativo a `UUID` e JSONB, ideal para relatórios analíticos no futuro. |
-| **Backend / API** | `.NET 8` (C# / ASP.NET Core Web API) | Extremamente robusto, tipado e de altíssima performance. Ideal para arquiteturas escaláveis em nuvem, utilizando Entity Framework Core para mapeamento relacional (ORM). |
+| **Backend / API** | `.NET 8` (C#) com DDD | Extremamente robusto e tipado. A adoção do DDD facilita testes unitários, manutenção de regras complexas e a separação de responsabilidades. |
 | **Mobile App** | `Flutter` (Dart) + `SQLite` (ou `Isar`) | Flutter permite compilar para Android e iOS com um único código entregando performance nativa. O banco local viabiliza o comportamento *offline-first* robusto. |
 | **Web Dashboard** | `Angular` + `TailwindCSS` + `Chart.js` | Angular é um framework robusto (mantido pelo Google), ideal para SPAs corporativas estruturadas. TailwindCSS ajuda no design responsivo e Chart.js fornece gráficos dinâmicos e limpos. |
 
@@ -39,10 +43,10 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 
 ## 🧠 3. Premissas e Decisões Técnicas
 
-1.  **Geração de IDs Descentralizada:** Para viabilizar a arquitetura offline-first, não podemos depender do banco de dados central para gerar IDs. Utilizamos **UUIDs v4** gerados no próprio dispositivo móvel via Flutter no momento do cadastro.
-2.  **Sincronização Resiliente:** Os registros criados no mobile ficam com um status local de `pendente`. Quando a internet volta, o App envia esses registros para o endpoint da API em .NET. O backend processa em lote para não sobrecarregar o banco de dados.
-3.  **Modelo de Dados Normalizado:** A estrutura plana foi quebrada em tabelas de `Alunos`, `Familias`, `Responsaveis` e `Matriculas`. Isso garante que o sistema cresça; se um aluno avançar de série, adicionamos apenas uma nova linha em `Matriculas`.
-4.  **Segurança e Validação:** A API em .NET implementará validações rigorosas nos *Controllers* ou através de *FluentValidation*. As rotas poderão exigir autenticação (JWT) para evitar inserção de dados falsos.
+1.  **DDD (Domain-Driven Design):** O backend foi estruturado em quatro camadas (Presentation, Application, Domain, Infrastructure). As Entidades e Agregados (como *Família*, *Aluno*, *Matrícula*) vivem no *Domain* e não possuem dependência de ORM.
+2.  **Geração de IDs Descentralizada:** Para viabilizar a arquitetura offline-first, não podemos depender do banco de dados central para gerar IDs. Utilizamos **UUIDs v4** gerados no próprio dispositivo móvel (Flutter) no momento do cadastro.
+3.  **Sincronização Resiliente:** Os registros criados no mobile ficam com um status local de `pendente`. Quando a internet volta, o App envia esses registros para o endpoint da API em .NET. O backend processa em lote para não sobrecarregar o banco de dados.
+4.  **Segurança e Validação:** As regras de validação ocorrem diretamente no Domínio (Domain Entities) para garantir que um estado inválido nunca seja persistido (fail-fast). As rotas de API (Presentation) exigirão autenticação (JWT).
 
 ---
 
@@ -57,10 +61,11 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 ├── web-dashboard/      # Código Angular (Visualização SPA)
 │   ├── src/app/components # Gráficos e Tabelas
 │   └── src/app/pages      # Dashboards (Geral, Sócio-econômico)
-├── BackendApi/         # Projeto C# / .NET 8 (Regras de negócio)
-│   ├── Controllers/    # Endpoints (ex: SyncController, DashboardController)
-│   ├── Services/       # Regras de negócios e validação
-│   └── Data/           # Entity Framework Core DbContext e Migrations
+├── BackendApi/         # Projeto C# / .NET 8 (Estrutura DDD)
+│   ├── Presentation/   # Camada Externa: API REST (Controllers e DTOs)
+│   ├── Application/    # Camada de Aplicação: Casos de Uso, Serviços e Interfaces
+│   ├── Domain/         # Camada de Núcleo: Entidades, Agregados, Regras de Negócio e Exceções
+│   └── Infrastructure/ # Camada de Dados: Entity Framework Core DbContext, Repositórios e Mapeamentos
 └── database/           # Scripts SQL (PostgreSQL base)
 ```
 
@@ -71,28 +76,27 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 ### 5.1 Configuração do Banco de Dados
 1. Certifique-se de possuir o PostgreSQL instalado.
 2. Crie um banco de dados: `CREATE DATABASE coleta_escolar;`
-3. Execute o script contido na pasta `database/` ou deixe o Entity Framework (code-first) criar as tabelas.
+3. Execute o script contido na pasta `database/` ou deixe o Entity Framework (Infrastructure) criar as tabelas baseadas no Domínio.
 
-### 5.2 Execução do Backend (API .NET)
+### 5.2 Execução do Backend (API .NET com DDD)
 *(Instruções a serem detalhadas após a criação do código)*
-1. Acesse a pasta `BackendApi/`
+1. Acesse a pasta `BackendApi/Presentation` (ou a raiz da Solução .sln).
 2. Certifique-se de ter o .NET 8 SDK instalado.
-3. Configure o arquivo `appsettings.json` com a *connection string* do PostgreSQL.
-4. Execute `dotnet ef database update` para rodar as migrations.
-5. Rode `dotnet run`. A API iniciará escutando (geralmente nas portas 5000/5001 ou via Swagger na porta configurada).
+3. Configure o arquivo `appsettings.json` na camada Presentation com a string do PostgreSQL.
+4. Execute `dotnet run --project Presentation`. A API iniciará escutando nas portas 5000/5001.
 
 ### 5.3 Execução do Aplicativo Mobile (Flutter)
 *(Instruções a serem detalhadas após a criação do código)*
 1. Acesse a pasta `mobile-app/`
 2. Execute `flutter pub get` para instalar as dependências.
 3. Com um emulador ou dispositivo físico conectado, execute `flutter run`.
-4. *Nota:* Teste o aplicativo desligando a conexão de rede para verificar o comportamento offline e, em seguida, religue para testar o envio para a API .NET.
+4. *Nota:* Teste o aplicativo desligando a conexão de rede para verificar o comportamento offline.
 
 ### 5.4 Execução do Ambiente Web (Angular)
 *(Instruções a serem detalhadas após a criação do código)*
 1. Acesse a pasta `web-dashboard/`
 2. Execute `npm install`
-3. Rode `ng serve` (certifique-se de ter o Angular CLI globalmente instalado com `npm i -g @angular/cli`).
+3. Rode `ng serve`
 4. Acesse `http://localhost:4200` no navegador para visualizar as métricas.
 
 ---
@@ -100,4 +104,4 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 ## 📝 6. Ponto de Atenção e Pendências
 
 - *(A ser atualizado pelo candidato durante a implementação)*
-- **Faltante:** A implementação real de um mecanismo de notificação caso ocorra um conflito crítico na sincronização de dados (ex: dois usuários editando o mesmo cadastro ao mesmo tempo offline). A resolução atual adotará o método *"Last-Write Wins"* (a última gravação, com base no timestamp, sobrescreve a anterior).
+- **Faltante:** A implementação de mensageria (RabbitMQ / Kafka) caso o sistema ganhe escala nacional, para publicar Eventos de Domínio (*Domain Events*) quando um novo aluno for sincronizado. Atualmente, o fluxo é totalmente síncrono.
