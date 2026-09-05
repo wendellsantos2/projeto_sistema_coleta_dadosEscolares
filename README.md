@@ -62,10 +62,11 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 │   ├── src/app/components # Gráficos e Tabelas
 │   └── src/app/pages      # Dashboards (Geral, Sócio-econômico)
 ├── BackendApi/         # Projeto C# / .NET 8 (Estrutura DDD)
-│   ├── Presentation/   # Camada Externa: API REST (Controllers e DTOs)
-│   ├── Application/    # Camada de Aplicação: Casos de Uso, Serviços e Interfaces
-│   ├── Domain/         # Camada de Núcleo: Entidades, Agregados, Regras de Negócio e Exceções
-│   └── Infrastructure/ # Camada de Dados: Entity Framework Core DbContext, Repositórios e Mapeamentos
+│   ├── WebApi/         # Camada Externa: API REST (Controllers)
+│   ├── Application/    # Camada de Aplicação: Casos de Uso, DTOs e Serviços
+│   ├── Domain/         # Camada de Núcleo: Regras de Negócio e Exceções
+│   ├── Entities/       # Entidades e Agregados de Domínio
+│   └── Infra/          # Camada de Dados: Entity Framework, Repositórios e DbContext
 └── database/           # Scripts SQL (PostgreSQL base)
 ```
 
@@ -80,10 +81,10 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 
 ### 5.2 Execução do Backend (API .NET com DDD)
 *(Instruções a serem detalhadas após a criação do código)*
-1. Acesse a pasta `BackendApi/Presentation` (ou a raiz da Solução .sln).
+1. Acesse a pasta `BackendApi/WebApi` (ou a raiz da Solução `ProjetoBase.sln`).
 2. Certifique-se de ter o .NET 8 SDK instalado.
-3. Configure o arquivo `appsettings.json` na camada Presentation com a string do PostgreSQL.
-4. Execute `dotnet run --project Presentation`. A API iniciará escutando nas portas 5000/5001.
+3. Configure o arquivo `appsettings.json` na camada WebApi com a string do PostgreSQL.
+4. Execute `dotnet run --project WebApi`. A API iniciará escutando nas portas configuradas.
 
 ### 5.3 Execução do Aplicativo Mobile (Flutter)
 *(Instruções a serem detalhadas após a criação do código)*
