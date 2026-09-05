@@ -33,7 +33,7 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 | **Banco de Dados** | `PostgreSQL` | Relacional, excelente performance, suporte nativo a `UUID` e JSONB, ideal para relatórios analíticos no futuro. |
 | **Backend / API** | `.NET 8` (C# / ASP.NET Core Web API) | Extremamente robusto, tipado e de altíssima performance. Ideal para arquiteturas escaláveis em nuvem, utilizando Entity Framework Core para mapeamento relacional (ORM). |
 | **Mobile App** | `Flutter` (Dart) + `SQLite` (ou `Isar`) | Flutter permite compilar para Android e iOS com um único código entregando performance nativa. O banco local viabiliza o comportamento *offline-first* robusto. |
-| **Web Dashboard** | `Next.js` + `TailwindCSS` + `Recharts` | Next.js oferece rotas otimizadas e renderização veloz. TailwindCSS para design estonteante e flexível, e Recharts para visualizações gráficas limpas. |
+| **Web Dashboard** | `Angular` + `TailwindCSS` + `Chart.js` | Angular é um framework robusto (mantido pelo Google), ideal para SPAs corporativas estruturadas. TailwindCSS ajuda no design responsivo e Chart.js fornece gráficos dinâmicos e limpos. |
 
 ---
 
@@ -54,9 +54,9 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 │   ├── lib/database    # Schemas locais e gerenciamento do SQLite/Isar
 │   ├── lib/screens     # Telas do formulário
 │   └── lib/services    # Lógica de sincronização HTTP com a API
-├── web-dashboard/      # Código Next.js (Visualização)
-│   ├── src/components  # Gráficos e Tabelas
-│   └── src/pages       # Dashboards (Geral, Sócio-econômico)
+├── web-dashboard/      # Código Angular (Visualização SPA)
+│   ├── src/app/components # Gráficos e Tabelas
+│   └── src/app/pages      # Dashboards (Geral, Sócio-econômico)
 ├── BackendApi/         # Projeto C# / .NET 8 (Regras de negócio)
 │   ├── Controllers/    # Endpoints (ex: SyncController, DashboardController)
 │   ├── Services/       # Regras de negócios e validação
@@ -88,12 +88,12 @@ A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o 
 3. Com um emulador ou dispositivo físico conectado, execute `flutter run`.
 4. *Nota:* Teste o aplicativo desligando a conexão de rede para verificar o comportamento offline e, em seguida, religue para testar o envio para a API .NET.
 
-### 5.4 Execução do Ambiente Web (Next.js)
+### 5.4 Execução do Ambiente Web (Angular)
 *(Instruções a serem detalhadas após a criação do código)*
 1. Acesse a pasta `web-dashboard/`
 2. Execute `npm install`
-3. Rode `npm run dev`.
-4. Acesse `http://localhost:3000` no navegador para visualizar as métricas.
+3. Rode `ng serve` (certifique-se de ter o Angular CLI globalmente instalado com `npm i -g @angular/cli`).
+4. Acesse `http://localhost:4200` no navegador para visualizar as métricas.
 
 ---
 
