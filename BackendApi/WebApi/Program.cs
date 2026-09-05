@@ -6,7 +6,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "API Sistema de Coleta de Dados Escolares",
+        Version = "v1",
+        Description = "API robusta com suporte offline-first, desenvolvida para coletar e sincronizar dados socioeconômicos de alunos e suas famílias.",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "Teste Técnico",
+            Email = "candidato@teste.com"
+        }
+    });
+});
 
 // Configure DbContext
 builder.Services.AddDbContext<ColetaDbContext>(options =>
