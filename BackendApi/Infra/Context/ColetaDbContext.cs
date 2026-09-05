@@ -13,6 +13,7 @@ public class ColetaDbContext : DbContext
     public DbSet<AlunoResponsavel> AlunosResponsaveis { get; set; }
     public DbSet<Matricula> Matriculas { get; set; }
     public DbSet<RegistroColeta> RegistrosColeta { get; set; }
+    public DbSet<Usuario> Usuarios { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -4,11 +4,13 @@ using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Coletor")]
 public class SyncController : ControllerBase
 {
     private readonly ISyncService _syncService;
