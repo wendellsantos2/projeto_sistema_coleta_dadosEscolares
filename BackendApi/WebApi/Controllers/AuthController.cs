@@ -30,4 +30,21 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = ex.Message });
         }
     }
+
+    [HttpPost("cadastrar")]
+    public async Task<IActionResult> Cadastrar([FromBody] CadastroUsuarioDto cadastroDto)
+    {
+        try
+        {
+            if (cadastroDto.TipoRole != 1 && cadastroDto.TipoRole != 2)
+                return BadRequest(new { message = "TipoRole inválido. Use 1 para Admin ou 2 para Coletor." });
+
+            await _authService.CadastrarAsync(cadastroDto);
+            return Ok(new { message = "Usuário cadastrado com sucesso!" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

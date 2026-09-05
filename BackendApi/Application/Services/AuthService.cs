@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
+using Entities.Models;
 using Infra.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,10 +25,28 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
+    public async Task CadastrarAsync(CadastroUsuarioDto cadastroDto)
+    {
+        var usuarioExistente = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == cadastroDto.Email);
+        if (usuarioExistente != null)
+            throw new Exception("Já existe um usuário com este e-mail.");
+
+        string roleName = cadastroDto.TipoRole == 1 ? "Admin" : "Coletor";
+
+        var usuario = new Usuario
+        {
+            Id = Guid.NewGuid(),
+            Email = cadastroDto.Email,
+            SenhaHash = cadastroDto.Senha, // Num cenário real, deve-se aplicar Hash (ex: BCrypt)
+            Role = roleName
+        };
+
+        _context.Usuarios.Add(usuario);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<TokenDto> LoginAsync(LoginDto loginDto)
     {
-        // Obs: Em um cenário real, as senhas estariam usando BCrypt. 
-        // Aqui estamos simplificando para o teste técnico.
         var usuario = await _context.Usuarios
             .FirstOrDefaultAsync(u => u.Email == loginDto.Email && u.SenhaHash == loginDto.Senha);
 
