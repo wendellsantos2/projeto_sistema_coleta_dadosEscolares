@@ -1,6 +1,5 @@
-using System;
+ï»¿using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,18 +26,27 @@ public class AuthService : IAuthService
 
     public async Task CadastrarAsync(CadastroUsuarioDto cadastroDto)
     {
-        var usuarioExistente = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == cadastroDto.Email);
-        if (usuarioExistente != null)
-            throw new Exception("Já existe um usuário com este e-mail.");
+        var usuarioExistente = await _context.Usuarios
+            .FirstOrDefaultAsync(u => u.Email == cadastroDto.Email);
 
-        string roleName = cadastroDto.TipoRole == 1 ? "Admin" : "Coletor";
+        if (usuarioExistente != null)
+            throw new Exception("Ja existe um usuario com este e-mail.");
+
+        string perfil = cadastroDto.TipoRole switch
+        {
+            1 => "ADMIN",
+            2 => "GESTOR",
+            _ => "PESQUISADOR"
+        };
 
         var usuario = new Usuario
         {
             Id = Guid.NewGuid(),
+            Nome = cadastroDto.Nome ?? cadastroDto.Email,
             Email = cadastroDto.Email,
-            SenhaHash = cadastroDto.Senha, // Num cenário real, deve-se aplicar Hash (ex: BCrypt)
-            Role = roleName
+            SenhaHash = cadastroDto.Senha,
+            Perfil = perfil,
+            Ativo = true
         };
 
         _context.Usuarios.Add(usuario);
@@ -51,21 +59,32 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(u => u.Email == loginDto.Email && u.SenhaHash == loginDto.Senha);
 
         if (usuario == null)
-            throw new UnauthorizedAccessException("Usuário ou senha inválidos.");
+            throw new UnauthorizedAccessException("Usuario ou senha invalidos.");
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var secretKey = _configuration.GetValue<string>("JwtSettings:SecretKey") ?? "uma-chave-secreta-muito-longa-e-segura-123456";
+        if (!usuario.Ativo)
+            throw new UnauthorizedAccessException("Conta desativada. Contate o administrador.");
+
+        usuario.UltimoLogin = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        var secretKey = _configuration.GetValue<string>("JwtSettings:SecretKey")
+                        ?? "uma-chave-secreta-muito-longa-e-segura-123456";
         var key = Encoding.ASCII.GetBytes(secretKey);
 
+        var tokenHandler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.Name, usuario.Email),
-                new Claim(ClaimTypes.Role, usuario.Role)
+                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new Claim(ClaimTypes.Email, usuario.Email),
+                new Claim(ClaimTypes.Name, usuario.Nome),
+                new Claim(ClaimTypes.Role, usuario.Perfil)
             }),
             Expires = DateTime.UtcNow.AddHours(2),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -73,7 +92,7 @@ public class AuthService : IAuthService
         return new TokenDto
         {
             Token = tokenHandler.WriteToken(token),
-            Role = usuario.Role
+            Role = usuario.Perfil
         };
     }
 }

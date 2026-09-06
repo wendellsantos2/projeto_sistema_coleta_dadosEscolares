@@ -1,4 +1,4 @@
-using Infra.Context;
+﻿using Infra.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -7,14 +7,15 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuração JWT
-var secretKey = builder.Configuration.GetValue<string>("JwtSettings:SecretKey") ?? "uma-chave-secreta-muito-longa-e-segura-123456";
+// ── JWT ──────────────────────────────────────────────────────────────────────
+var secretKey = builder.Configuration["JwtSettings:SecretKey"]
+                ?? throw new InvalidOperationException("JwtSettings:SecretKey nao configurada.");
 var key = Encoding.ASCII.GetBytes(secretKey);
 
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(x =>
 {
@@ -23,39 +24,43 @@ builder.Services.AddAuthentication(x =>
     x.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false
+        IssuerSigningKey         = new SymmetricSecurityKey(key),
+        ValidateIssuer           = false,
+        ValidateAudience         = false,
+        ClockSkew                = TimeSpan.Zero
     };
 });
 
-// Add services to the container.
+// ── Banco de Dados ────────────────────────────────────────────────────────────
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                       ?? throw new InvalidOperationException("Connection string 'DefaultConnection' nao encontrada.");
+
+builder.Services.AddDbContext<ColetaDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+// ── Controllers ───────────────────────────────────────────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Configuração Swagger com Botão Authorize (JWT)
+// ── Swagger com suporte a JWT ─────────────────────────────────────────────────
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "API Sistema de Coleta de Dados Escolares",
-        Version = "v1",
-        Description = "API robusta com suporte offline-first, desenvolvida para coletar e sincronizar dados socioeconômicos de alunos e suas famílias.",
-        Contact = new OpenApiContact
-        {
-            Name = "Teste Técnico",
-            Email = "candidato@teste.com"
-        }
+        Title       = "API - Sistema de Coleta de Dados Escolares",
+        Version     = "v1",
+        Description = "API RESTful com autenticacao JWT e suporte offline-first. " +
+                      "Use POST /api/auth/login para obter o token e clique em Authorize."
     });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
+        Name         = "Authorization",
+        Type         = SecuritySchemeType.ApiKey,
+        Scheme       = "Bearer",
         BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Insira o token JWT desta maneira: Bearer {seu token}"
+        In           = ParameterLocation.Header,
+        Description  = "Insira o token no formato: Bearer {seu_token}"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -63,43 +68,46 @@ builder.Services.AddSwaggerGen(c =>
         {
             new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
 
-// Configure DbContext
-builder.Services.AddDbContext<ColetaDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// ── CORS (dev: permite todas as origens) ─────────────────────────────────────
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevPolicy", policy =>
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
 
-// Dependency Injection
+// ── Injecao de Dependencia (Application Services) ────────────────────────────
 builder.Services.AddScoped<Application.Interfaces.IFamiliaService, Application.Services.FamiliaService>();
-builder.Services.AddScoped<Application.Interfaces.ISyncService, Application.Services.SyncService>();
-builder.Services.AddScoped<Application.Interfaces.IAuthService, Application.Services.AuthService>();
+builder.Services.AddScoped<Application.Interfaces.ISyncService,    Application.Services.SyncService>();
+builder.Services.AddScoped<Application.Interfaces.IAuthService,    Application.Services.AuthService>();
 
+// ─────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// ── Aplicar Migrations automaticamente ao iniciar ────────────────────────────
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c => 
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Coleta Escolar v1");
-        c.RoutePrefix = string.Empty; // Abre o Swagger na raiz (localhost)
-    });
+    var db = scope.ServiceProvider.GetRequiredService<ColetaDbContext>();
+    db.Database.Migrate();
 }
 
-app.UseHttpsRedirection();
+// ── Pipeline ──────────────────────────────────────────────────────────────────
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Coleta Escolar v1");
+    c.RoutePrefix = string.Empty; // Swagger abre em http://localhost:5000
+});
 
+app.UseCors("DevPolicy");
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 app.Run();

@@ -1,112 +1,227 @@
-# 🏫 Sistema de Coleta de Dados Escolares (Solução Escalável)
+﻿# Sistema de Coleta de Dados Escolares
 
-Este repositório contém a documentação e os códigos-fonte da solução desenvolvida para a coleta, armazenamento, sincronização e apresentação de dados socioeconômicos de alunos e suas famílias.
-
-O projeto foi projetado com um foco rigoroso em **escalabilidade**, **resiliência (offline-first)** e **facilidade de manutenção**.
+Solucao completa para coleta, armazenamento, sincronizacao e visualizacao de dados
+socioeconomicos de alunos e suas familias, desenvolvida como teste tecnico.
 
 ---
 
-## 🏗️ 1. Arquitetura Adotada
+## 1. Arquitetura
 
-Para garantir que o projeto possa escalar desde um colégio comunitário até uma rede inteira de escolas públicas ou privadas, adotamos uma arquitetura orientada a serviços com foco na nuvem (Cloud-Native) e resiliência no lado do cliente.
-
-Para o **Backend em .NET**, adotamos os princípios do **Domain-Driven Design (DDD)** e arquitetura limpa (Clean Architecture). Isso garante que o núcleo das regras de negócio seja completamente isolado de tecnologias de banco de dados ou da interface (API).
-
-### Fluxo de Informações
-```mermaid
-graph LR
-    A[Mobile App offline-first] -->|Sincronização Lote| B(API RESTful .NET - Camada de Apresentação)
-    B -->|Casos de Uso| C(Camada de Aplicação / Domínio)
-    C -->|Repositórios| D(Camada de Infraestrutura)
-    D -->|Gravação/Leitura| E[(PostgreSQL)]
-    F[Web Dashboard Angular] -->|Consultas/Indicadores| B
+```
+[Mobile Flutter] --offline-first--> [API .NET 9 / C#] --> [PostgreSQL 15]
+                                           |
+                              [Web Dashboard Angular 21]
 ```
 
-*   **Mobile App (Coletor):** Trabalha de forma autônoma (offline). Todos os dados são armazenados em um banco local e enviados para o servidor de forma assíncrona assim que houver conectividade. O controle é feito através de **UUIDs**.
-*   **Backend (API .NET com DDD):** Atua como o "cérebro" da aplicação. O núcleo do Domínio garante a validação e consistência, enquanto a Infraestrutura persiste no PostgreSQL.
-*   **Web Dashboard:** Aplicação SPA (Single Page Application) focada em consumir dados agregados do backend para plotagem de gráficos em tempo real.
+- **Mobile (Flutter):** Coleta dados em campo. Opera offline com SQLite local e sincroniza com a API quando ha conexao.
+- **Backend (ASP.NET Core + EF Core):** API RESTful com autenticacao JWT, arquitetura em camadas (DDD).
+- **Banco de Dados (PostgreSQL 15):** Gerenciado via Docker e migrations do Entity Framework Core.
+- **Web Dashboard (Angular 21):** Painel SPA para visualizacao de indicadores e consulta de registros.
 
 ---
 
-## 🚀 2. Tecnologias Utilizadas
+## 2. Tecnologias Utilizadas
 
-A pilha de tecnologias escolhida visa suportar alta concorrência e facilitar o desenvolvimento moderno, utilizando as stacks solicitadas:
-
-| Componente | Tecnologia Escolhida | Justificativa |
-| :--- | :--- | :--- |
-| **Banco de Dados** | `PostgreSQL` | Relacional, excelente performance, suporte nativo a `UUID` e JSONB, ideal para relatórios analíticos no futuro. |
-| **Backend / API** | `.NET 8` (C#) com DDD | Extremamente robusto e tipado. A adoção do DDD facilita testes unitários, manutenção de regras complexas e a separação de responsabilidades. |
-| **Mobile App** | `Flutter` (Dart) + `SQLite` (ou `Isar`) | Flutter permite compilar para Android e iOS com um único código entregando performance nativa. O banco local viabiliza o comportamento *offline-first* robusto. |
-| **Web Dashboard** | `Angular` + `TailwindCSS` + `Chart.js` | Angular é um framework robusto (mantido pelo Google), ideal para SPAs corporativas estruturadas. TailwindCSS ajuda no design responsivo e Chart.js fornece gráficos dinâmicos e limpos. |
-
----
-
-## 🧠 3. Premissas e Decisões Técnicas
-
-1.  **DDD (Domain-Driven Design):** O backend foi estruturado em quatro camadas (Presentation, Application, Domain, Infrastructure). As Entidades e Agregados (como *Família*, *Aluno*, *Matrícula*) vivem no *Domain* e não possuem dependência de ORM.
-2.  **Geração de IDs Descentralizada:** Para viabilizar a arquitetura offline-first, não podemos depender do banco de dados central para gerar IDs. Utilizamos **UUIDs v4** gerados no próprio dispositivo móvel (Flutter) no momento do cadastro.
-3.  **Sincronização Resiliente:** Os registros criados no mobile ficam com um status local de `pendente`. Quando a internet volta, o App envia esses registros para o endpoint da API em .NET. O backend processa em lote para não sobrecarregar o banco de dados.
-4.  **Segurança e Validação:** As regras de validação ocorrem diretamente no Domínio (Domain Entities) para garantir que um estado inválido nunca seja persistido (fail-fast). As rotas de API (Presentation) exigirão autenticação (JWT).
+| Componente        | Tecnologia                          |
+|-------------------|-------------------------------------|
+| Backend / API     | .NET 9 (C#), ASP.NET Core, EF Core  |
+| Banco de Dados    | PostgreSQL 15 (Docker)              |
+| ORM / Migrations  | Entity Framework Core 8 + Npgsql    |
+| Autenticacao      | JWT Bearer (System.IdentityModel)   |
+| Mobile            | Flutter (Dart) + SQLite             |
+| Web Dashboard     | Angular 21 + Chart.js               |
+| Infraestrutura    | Docker, Docker Compose              |
 
 ---
 
-## 🛠️ 4. Estrutura dos Principais Componentes
+## 3. Estrutura do Projeto
 
-```text
+```
 /
-├── mobile-app/         # Código Flutter (Coleta Offline-First)
-│   ├── lib/database    # Schemas locais e gerenciamento do SQLite/Isar
-│   ├── lib/screens     # Telas do formulário
-│   └── lib/services    # Lógica de sincronização HTTP com a API
-├── web-dashboard/      # Código Angular (Visualização SPA)
-│   ├── src/app/components # Gráficos e Tabelas
-│   └── src/app/pages      # Dashboards (Geral, Sócio-econômico)
-├── BackendApi/         # Projeto C# / .NET 8 (Estrutura DDD)
-│   ├── WebApi/         # Camada Externa: API REST (Controllers)
-│   ├── Application/    # Camada de Aplicação: Casos de Uso, DTOs e Serviços
-│   ├── Domain/         # Camada de Núcleo: Regras de Negócio e Exceções
-│   ├── Entities/       # Entidades e Agregados de Domínio
-│   └── Infra/          # Camada de Dados: Entity Framework, Repositórios e DbContext
-└── database/           # Scripts SQL (PostgreSQL base)
+├── BackendApi/               # Solucao .NET (DDD)
+│   ├── WebApi/               # Controllers, Program.cs, appsettings.json
+│   ├── Application/          # Services, DTOs, Interfaces (casos de uso)
+│   ├── Domain/               # Regras de negocio puras
+│   ├── Entities/             # Entidades / Models (POCOs)
+│   │   └── Models/           # Aluno, Familia, Usuario, RefreshToken, etc.
+│   └── Infra/                # DbContext, Migrations, ColetaDbContextFactory
+├── mobile-app/               # Projeto Flutter (offline-first)
+├── web-dashboard/            # Projeto Angular 21
+├── database/
+│   └── init.sql              # Apenas cria extensao uuid-ossp (tabelas via migrations)
+├── docs/                     # Documentacao: MER, Casos de Uso
+└── docker-compose.yml        # Sobe o PostgreSQL na porta 5433
 ```
 
 ---
 
-## ⚙️ 5. Instruções para Execução (Ambiente de Desenvolvimento)
+## 4. Configuracao do Banco de Dados
 
-### 5.1 Configuração do Banco de Dados (via Docker)
-Para simplificar o ambiente, providenciamos um arquivo `docker-compose.yml` que já sobe o PostgreSQL com as tabelas criadas automaticamente através de um script de inicialização:
-1. Certifique-se de ter o Docker e o Docker Compose instalados.
-2. Na raiz do projeto, execute o comando:
-   ```bash
-   docker-compose up -d
-   ```
-3. O banco estará disponível na porta `5432` com o usuário `postgres`, senha `password` e o banco de dados `coleta_escolar` já estruturado!
+### Pre-requisitos
+- Docker Desktop instalado e em execucao
+- Porta **5433** livre (o PostgreSQL local geralmente ocupa a 5432)
 
-### 5.2 Execução do Backend (API .NET com DDD)
-*(Instruções a serem detalhadas após a criação do código)*
-1. Acesse a pasta `BackendApi/WebApi` (ou a raiz da Solução `ProjetoBase.sln`).
-2. Certifique-se de ter o .NET 8 SDK instalado.
-3. Configure o arquivo `appsettings.json` na camada WebApi com a string do PostgreSQL.
-4. Execute `dotnet run --project WebApi`. A API iniciará escutando nas portas configuradas.
+> **Por que porta 5433?**
+> Se voce tiver o PostgreSQL instalado localmente no Windows, ele ja ocupa a porta 5432.
+> O Docker foi configurado para mapear a porta **5433** do host para a 5432 do container,
+> evitando conflito de porta.
 
-### 5.3 Execução do Aplicativo Mobile (Flutter)
-*(Instruções a serem detalhadas após a criação do código)*
-1. Acesse a pasta `mobile-app/`
-2. Execute `flutter pub get` para instalar as dependências.
-3. Com um emulador ou dispositivo físico conectado, execute `flutter run`.
-4. *Nota:* Teste o aplicativo desligando a conexão de rede para verificar o comportamento offline.
+### Subir o banco de dados
 
-### 5.4 Execução do Ambiente Web (Angular)
-*(Instruções a serem detalhadas após a criação do código)*
-1. Acesse a pasta `web-dashboard/`
-2. Execute `npm install`
-3. Rode `ng serve`
-4. Acesse `http://localhost:4200` no navegador para visualizar as métricas.
+```bash
+# Na raiz do projeto:
+docker-compose up -d
+```
+
+O container `coleta_escolar_db` ira iniciar com:
+- **Host:** 127.0.0.1
+- **Porta:** 5433
+- **Banco:** coleta_escolar
+- **Usuario:** postgres
+- **Senha:** password
+
+### Aplicar as Migrations (criar as tabelas)
+
+```bash
+dotnet ef database update \
+  --project BackendApi/Infra/Infra.csproj \
+  --startup-project BackendApi/Infra/Infra.csproj
+```
+
+Isso criara automaticamente todas as 9 tabelas:
+`usuarios`, `refresh_tokens`, `familias`, `alunos`, `responsaveis`,
+`aluno_responsavel`, `matriculas`, `registros_coleta`, `__EFMigrationsHistory`
 
 ---
 
-## 📝 6. Ponto de Atenção e Pendências
+## 5. Execucao do Backend (.NET 9)
 
-- *(A ser atualizado pelo candidato durante a implementação)*
-- **Faltante:** A implementação de mensageria (RabbitMQ / Kafka) caso o sistema ganhe escala nacional, para publicar Eventos de Domínio (*Domain Events*) quando um novo aluno for sincronizado. Atualmente, o fluxo é totalmente síncrono.
+### Pre-requisitos
+- .NET 9 SDK instalado (`dotnet --version` deve retornar 9.x)
+- Banco de dados rodando (passo anterior)
+
+### Configuracao
+
+O arquivo `BackendApi/WebApi/appsettings.json` ja vem pre-configurado:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=127.0.0.1;Port=5433;Database=coleta_escolar;Username=postgres;Password=password"
+  },
+  "JwtSettings": {
+    "SecretKey": "coleta-escolar-chave-secreta-jwt-2026-muito-longa-e-segura"
+  }
+}
+```
+
+> Em producao, substitua `SecretKey` por uma chave forte e armazene em variaveis de ambiente
+> ou em um gerenciador de segredos (Azure Key Vault, AWS Secrets Manager, etc.).
+
+### Iniciar a API
+
+```bash
+dotnet run --project BackendApi/WebApi/WebApi.csproj
+```
+
+A API estara disponivel em:
+- **Swagger UI:** http://localhost:5000 (abre automaticamente na raiz)
+- **API Base URL:** http://localhost:5000/api
+
+### Endpoints principais
+
+| Metodo | Rota                  | Auth | Descricao                       |
+|--------|-----------------------|------|---------------------------------|
+| POST   | /api/auth/cadastrar   | Nao  | Cadastra novo usuario           |
+| POST   | /api/auth/login       | Nao  | Autentica e retorna JWT         |
+| POST   | /api/sync             | Sim  | Sincroniza coletas do mobile    |
+| GET    | /api/familias         | Sim  | Lista familias cadastradas      |
+
+---
+
+## 6. Execucao do Mobile (Flutter)
+
+### Pre-requisitos
+- Flutter SDK >= 3.x instalado
+- Emulador Android/iOS ou dispositivo fisico conectado
+- API do backend rodando localmente
+
+### Instalar dependencias e rodar
+
+```bash
+cd mobile-app
+flutter pub get
+flutter run
+```
+
+### Testar modo offline
+
+1. Inicie o app com internet ativa e faca login.
+2. Desligue o Wi-Fi/dados moveis.
+3. Cadastre novos registros — eles ficam salvos localmente com status `PENDENTE`.
+4. Reative a internet e pressione "Sincronizar" para enviar ao backend.
+
+---
+
+## 7. Execucao do Web Dashboard (Angular 21)
+
+### Pre-requisitos
+- Node.js >= 20 e npm >= 10 instalados
+- API do backend rodando localmente
+
+### Instalar dependencias e rodar
+
+```bash
+cd web-dashboard
+npm install
+npm start
+```
+
+Acesse **http://localhost:4200** no navegador.
+
+---
+
+## 8. Fluxo Completo (Passo a Passo)
+
+```bash
+# 1. Sobe o banco
+docker-compose up -d
+
+# 2. Aplica as migrations
+dotnet ef database update \
+  --project BackendApi/Infra/Infra.csproj \
+  --startup-project BackendApi/Infra/Infra.csproj
+
+# 3. Inicia a API (terminal separado)
+dotnet run --project BackendApi/WebApi/WebApi.csproj
+
+# 4. Inicia o Web Dashboard (terminal separado)
+cd web-dashboard && npm install && npm start
+
+# 5. Inicia o Mobile (terminal separado)
+cd mobile-app && flutter pub get && flutter run
+```
+
+---
+
+## 9. Decisoes Tecnicas
+
+| Decisao | Justificativa |
+|---------|---------------|
+| **UUID como PK em RegistroColeta** | Permite gerar IDs no dispositivo mobile offline sem risco de colisão ao sincronizar. |
+| **EF Core Migrations** | Controle de versao do schema do banco — evita scripts SQL manuais desatualizados. |
+| **Docker na porta 5433** | Evita conflito com PostgreSQL local do Windows que ocupa a 5432. |
+| **JWT com Perfis (RBAC)** | `PESQUISADOR`, `GESTOR`, `ADMIN` — controle de acesso simples e extensivel. |
+| **init.sql minimo** | O schema e gerenciado inteiramente pelo EF. O `init.sql` apenas cria a extensao `uuid-ossp`. |
+| **Campo `criado_por` em Familia** | Rastreabilidade — saber qual pesquisador cadastrou cada familia. |
+| **`sincronizado_em` em RegistroColeta** | Permite ao app mobile identificar registros pendentes de sync. |
+
+---
+
+## 10. Pendencias e Proximos Passos
+
+- [ ] Implementar rotacao de Refresh Token (endpoint `POST /auth/refresh`)
+- [ ] Hash de senha com BCrypt (atualmente armazenado em texto plano para fins de teste)
+- [ ] Testes unitarios nas camadas Application e Domain
+- [ ] CORS configurado por ambiente (dev vs producao)
+- [ ] Deploy em nuvem (Railway, Render, Azure App Service)

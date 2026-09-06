@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infra.Migrations
 {
     [DbContext(typeof(ColetaDbContext))]
-    [Migration("20260905175134_AddUsuariosTable")]
-    partial class AddUsuariosTable
+    [Migration("20260906234032_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,7 +35,6 @@ namespace Infra.Migrations
                         .HasDefaultValueSql("uuid_generate_v4()");
 
                     b.Property<string>("CpfAluno")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("cpf_aluno");
@@ -51,7 +50,6 @@ namespace Infra.Migrations
                         .HasColumnName("data_nascimento");
 
                     b.Property<string>("DescricaoNecessidade")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("descricao_necessidade");
 
@@ -131,10 +129,15 @@ namespace Infra.Migrations
                         .HasColumnName("bairro");
 
                     b.Property<string>("BeneficioSocial")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("beneficio_social");
+
+                    b.Property<string>("CodigoFamilia")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("codigo_familia");
 
                     b.Property<string>("Comunidade")
                         .IsRequired()
@@ -147,6 +150,10 @@ namespace Infra.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<Guid>("CriadoPor")
+                        .HasColumnType("uuid")
+                        .HasColumnName("criado_por");
 
                     b.Property<string>("Endereco")
                         .IsRequired()
@@ -171,7 +178,6 @@ namespace Infra.Migrations
                         .HasColumnName("renda_familiar_mensal");
 
                     b.Property<string>("TipoAcessoInternet")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("tipo_acesso_internet");
@@ -183,6 +189,11 @@ namespace Infra.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("IdFamilia");
+
+                    b.HasIndex("CodigoFamilia")
+                        .IsUnique();
+
+                    b.HasIndex("CriadoPor");
 
                     b.ToTable("familias", (string)null);
                 });
@@ -236,37 +247,104 @@ namespace Infra.Migrations
                     b.ToTable("matriculas", (string)null);
                 });
 
+            modelBuilder.Entity("Entities.Models.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime>("ExpiraEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expira_em");
+
+                    b.Property<Guid>("IdUsuario")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_usuario");
+
+                    b.Property<bool>("Revogado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("revogado");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("token");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("user_agent");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdUsuario");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.ToTable("refresh_tokens", (string)null);
+                });
+
             modelBuilder.Entity("Entities.Models.RegistroColeta", b =>
                 {
                     b.Property<Guid>("IdRegistro")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id_registro");
+                        .HasColumnName("id_registro")
+                        .HasDefaultValueSql("uuid_generate_v4()");
 
                     b.Property<DateTime>("DataColeta")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("data_coleta");
+                        .HasColumnName("data_coleta")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<Guid>("IdAluno")
                         .HasColumnType("uuid")
                         .HasColumnName("id_aluno");
 
+                    b.Property<Guid?>("IdFamilia")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_familia");
+
+                    b.Property<Guid>("IdUsuario")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id_usuario");
+
                     b.Property<string>("Observacao")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("observacao");
+
+                    b.Property<DateTime?>("SincronizadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sincronizado_em");
 
                     b.Property<string>("StatusSincronizacao")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasDefaultValue("SINCRONIZADO")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("PENDENTE")
                         .HasColumnName("status_sincronizacao");
 
                     b.HasKey("IdRegistro");
 
                     b.HasIndex("IdAluno");
+
+                    b.HasIndex("IdFamilia");
+
+                    b.HasIndex("IdUsuario");
 
                     b.ToTable("registros_coleta", (string)null);
                 });
@@ -292,7 +370,6 @@ namespace Infra.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("EmailResponsavel")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("email_responsavel");
@@ -321,23 +398,58 @@ namespace Infra.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<bool>("Ativo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("ativo");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("data_criacao")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("email");
 
-                    b.Property<string>("Role")
+                    b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("nome");
+
+                    b.Property<string>("Perfil")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("PESQUISADOR")
+                        .HasColumnName("perfil");
 
                     b.Property<string>("SenhaHash")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("senha_hash");
+
+                    b.Property<DateTime?>("UltimoLogin")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ultimo_login");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Usuarios");
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("usuarios", (string)null);
                 });
 
             modelBuilder.Entity("Entities.Models.Aluno", b =>
@@ -373,6 +485,18 @@ namespace Infra.Migrations
                     b.Navigation("Responsavel");
                 });
 
+            modelBuilder.Entity("Entities.Models.Familia", b =>
+                {
+                    b.HasOne("Entities.Models.Usuario", "UsuarioCriador")
+                        .WithMany("FamiliasCreadas")
+                        .HasForeignKey("CriadoPor")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_familia_usuario");
+
+                    b.Navigation("UsuarioCriador");
+                });
+
             modelBuilder.Entity("Entities.Models.Matricula", b =>
                 {
                     b.HasOne("Entities.Models.Aluno", "Aluno")
@@ -385,6 +509,18 @@ namespace Infra.Migrations
                     b.Navigation("Aluno");
                 });
 
+            modelBuilder.Entity("Entities.Models.RefreshToken", b =>
+                {
+                    b.HasOne("Entities.Models.Usuario", "Usuario")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_refreshtoken_usuario");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("Entities.Models.RegistroColeta", b =>
                 {
                     b.HasOne("Entities.Models.Aluno", "Aluno")
@@ -394,7 +530,24 @@ namespace Infra.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_registro_aluno");
 
+                    b.HasOne("Entities.Models.Familia", "Familia")
+                        .WithMany("RegistrosColeta")
+                        .HasForeignKey("IdFamilia")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_registro_familia");
+
+                    b.HasOne("Entities.Models.Usuario", "Usuario")
+                        .WithMany("RegistrosColeta")
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_registro_usuario");
+
                     b.Navigation("Aluno");
+
+                    b.Navigation("Familia");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Entities.Models.Aluno", b =>
@@ -409,11 +562,22 @@ namespace Infra.Migrations
             modelBuilder.Entity("Entities.Models.Familia", b =>
                 {
                     b.Navigation("Alunos");
+
+                    b.Navigation("RegistrosColeta");
                 });
 
             modelBuilder.Entity("Entities.Models.Responsavel", b =>
                 {
                     b.Navigation("Alunos");
+                });
+
+            modelBuilder.Entity("Entities.Models.Usuario", b =>
+                {
+                    b.Navigation("FamiliasCreadas");
+
+                    b.Navigation("RefreshTokens");
+
+                    b.Navigation("RegistrosColeta");
                 });
 #pragma warning restore 612, 618
         }

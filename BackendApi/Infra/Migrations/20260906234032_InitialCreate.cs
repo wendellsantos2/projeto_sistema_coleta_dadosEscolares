@@ -6,35 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infra.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:PostgresExtension:uuid-ossp", ",,");
-
-            migrationBuilder.CreateTable(
-                name: "familias",
-                columns: table => new
-                {
-                    id_familia = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
-                    endereco = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    bairro = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    comunidade = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    qtd_moradores = table.Column<int>(type: "integer", nullable: false),
-                    renda_familiar_mensal = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    recebe_beneficio_social = table.Column<bool>(type: "boolean", nullable: false),
-                    beneficio_social = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    possui_internet_casa = table.Column<bool>(type: "boolean", nullable: false),
-                    tipo_acesso_internet = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_familias", x => x.id_familia);
-                });
 
             migrationBuilder.CreateTable(
                 name: "responsaveis",
@@ -44,12 +22,83 @@ namespace Infra.Migrations
                     nome_responsavel = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     cpf_responsavel = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     telefone_responsavel = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    email_responsavel = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    email_responsavel = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_responsaveis", x => x.id_responsavel);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "usuarios",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
+                    nome = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    senha_hash = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    perfil = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "PESQUISADOR"),
+                    ativo = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    data_criacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    ultimo_login = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_usuarios", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "familias",
+                columns: table => new
+                {
+                    id_familia = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
+                    codigo_familia = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    endereco = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    bairro = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    comunidade = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    qtd_moradores = table.Column<int>(type: "integer", nullable: false),
+                    renda_familiar_mensal = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    recebe_beneficio_social = table.Column<bool>(type: "boolean", nullable: false),
+                    beneficio_social = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    possui_internet_casa = table.Column<bool>(type: "boolean", nullable: false),
+                    tipo_acesso_internet = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    criado_por = table.Column<Guid>(type: "uuid", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_familias", x => x.id_familia);
+                    table.ForeignKey(
+                        name: "fk_familia_usuario",
+                        column: x => x.criado_por,
+                        principalTable: "usuarios",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "refresh_tokens",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
+                    id_usuario = table.Column<Guid>(type: "uuid", nullable: false),
+                    token = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    expira_em = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    revogado = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    criado_em = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    user_agent = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_refresh_tokens", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_refreshtoken_usuario",
+                        column: x => x.id_usuario,
+                        principalTable: "usuarios",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -61,9 +110,9 @@ namespace Infra.Migrations
                     nome_aluno = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     data_nascimento = table.Column<DateTime>(type: "date", nullable: false),
                     sexo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    cpf_aluno = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    cpf_aluno = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     necessidade_educacional_especial = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    descricao_necessidade = table.Column<string>(type: "text", nullable: false),
+                    descricao_necessidade = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
@@ -131,11 +180,14 @@ namespace Infra.Migrations
                 name: "registros_coleta",
                 columns: table => new
                 {
-                    id_registro = table.Column<Guid>(type: "uuid", nullable: false),
+                    id_registro = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "uuid_generate_v4()"),
                     id_aluno = table.Column<Guid>(type: "uuid", nullable: false),
-                    data_coleta = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    observacao = table.Column<string>(type: "text", nullable: false),
-                    status_sincronizacao = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "SINCRONIZADO")
+                    id_familia = table.Column<Guid>(type: "uuid", nullable: true),
+                    id_usuario = table.Column<Guid>(type: "uuid", nullable: false),
+                    data_coleta = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    observacao = table.Column<string>(type: "text", nullable: true),
+                    status_sincronizacao = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false, defaultValue: "PENDENTE"),
+                    sincronizado_em = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -146,6 +198,18 @@ namespace Infra.Migrations
                         principalTable: "alunos",
                         principalColumn: "id_aluno",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_registro_familia",
+                        column: x => x.id_familia,
+                        principalTable: "familias",
+                        principalColumn: "id_familia",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "fk_registro_usuario",
+                        column: x => x.id_usuario,
+                        principalTable: "usuarios",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -165,9 +229,31 @@ namespace Infra.Migrations
                 column: "id_familia");
 
             migrationBuilder.CreateIndex(
+                name: "IX_familias_codigo_familia",
+                table: "familias",
+                column: "codigo_familia",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_familias_criado_por",
+                table: "familias",
+                column: "criado_por");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_matriculas_id_aluno",
                 table: "matriculas",
                 column: "id_aluno");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_refresh_tokens_id_usuario",
+                table: "refresh_tokens",
+                column: "id_usuario");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_refresh_tokens_token",
+                table: "refresh_tokens",
+                column: "token",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_registros_coleta_id_aluno",
@@ -175,9 +261,25 @@ namespace Infra.Migrations
                 column: "id_aluno");
 
             migrationBuilder.CreateIndex(
+                name: "IX_registros_coleta_id_familia",
+                table: "registros_coleta",
+                column: "id_familia");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_registros_coleta_id_usuario",
+                table: "registros_coleta",
+                column: "id_usuario");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_responsaveis_cpf_responsavel",
                 table: "responsaveis",
                 column: "cpf_responsavel",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_usuarios_email",
+                table: "usuarios",
+                column: "email",
                 unique: true);
         }
 
@@ -191,6 +293,9 @@ namespace Infra.Migrations
                 name: "matriculas");
 
             migrationBuilder.DropTable(
+                name: "refresh_tokens");
+
+            migrationBuilder.DropTable(
                 name: "registros_coleta");
 
             migrationBuilder.DropTable(
@@ -201,6 +306,9 @@ namespace Infra.Migrations
 
             migrationBuilder.DropTable(
                 name: "familias");
+
+            migrationBuilder.DropTable(
+                name: "usuarios");
         }
     }
 }
