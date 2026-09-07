@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Application.DTOs;
 using Application.Interfaces;
@@ -39,6 +39,6 @@ public class RegistrosColetaController : ControllerBase
     [HttpGet("dashboard")]
     [Authorize(Roles = "GESTOR,ADMIN")]
     [ProducesResponseType(typeof(DashboardDto), 200)]
-    public async Task<IActionResult> Dashboard()
-        => Ok(await _registroService.ObterDashboardAsync());
+    public async Task<IActionResult> Dashboard([FromQuery] string? bairro, [FromQuery] string? turno)
+        => Ok(await _registroService.ObterDashboardAsync(bairro, turno));
 }

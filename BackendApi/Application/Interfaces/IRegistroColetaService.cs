@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.DTOs;
@@ -9,5 +9,5 @@ public interface IRegistroColetaService
 {
     Task<IEnumerable<RegistroColetaResponseDto>> ObterTodosAsync(string? status = null);
     Task<RegistroColetaResponseDto?> ObterPorIdAsync(Guid id);
-    Task<DashboardDto> ObterDashboardAsync();
+    Task<DashboardDto> ObterDashboardAsync(string? bairro = null, string? turno = null);
 }

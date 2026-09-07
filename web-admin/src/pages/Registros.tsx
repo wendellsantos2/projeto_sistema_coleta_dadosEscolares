@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { ArrowLeft, CheckCircle, Clock, Eye, X, FileText } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Eye, X, FileText, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 
 export default function Registros() {
   const navigate = useNavigate();
@@ -24,6 +25,34 @@ export default function Registros() {
     fetchRegistros();
   }, []);
 
+  function exportToExcel() {
+    const dataToExport = registros.map(r => ({
+      'Código Aluno': 'ALU-' + r.idAluno.substring(0,8).toUpperCase(),
+      'Nome Aluno': r.nomeAluno,
+      'CPF Aluno': r.cpfAluno || '',
+      'Data Nascimento': r.dataNascimento ? new Date(r.dataNascimento).toLocaleDateString('pt-BR') : '',
+      'Necessidade Especial': r.necessidadeEducacionalEspecial ? 'Sim' : 'Não',
+      'Endereço': r.endereco,
+      'Bairro': r.bairro,
+      'Comunidade': r.comunidade || '',
+      'Renda Mensal (R$)': r.rendaFamiliarMensal,
+      'Recebe Benefício': r.recebeBeneficioSocial ? 'Sim' : 'Não',
+      'Benefício': r.beneficioSocial || '',
+      'Possui Internet': r.possuiInternetCasa ? 'Sim' : 'Não',
+      'Tipo Acesso Internet': r.tipoAcessoInternet || '',
+      'Pesquisador': r.pesquisadorNome,
+      'Status Sincronização': r.statusSincronizacao,
+      'Data Coleta': new Date(r.dataColeta).toLocaleString('pt-BR'),
+      'Sincronizado Em': r.sincronizadoEm ? new Date(r.sincronizadoEm).toLocaleString('pt-BR') : '',
+      'Observação': r.observacao || ''
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Registros");
+    XLSX.writeFile(wb, "Registros_Coleta.xlsx");
+  }
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50">Carregando...</div>;
   }
@@ -38,10 +67,17 @@ export default function Registros() {
           >
             <ArrowLeft className="w-6 h-6 text-slate-700" />
           </button>
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-slate-800">Registros Coletados</h1>
             <p className="text-slate-500">Listagem de todas as pesquisas realizadas em campo</p>
           </div>
+          <button 
+            onClick={exportToExcel}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors"
+          >
+            <Download className="w-5 h-5" />
+            Exportar Excel
+          </button>
         </div>
 
         {error && (
