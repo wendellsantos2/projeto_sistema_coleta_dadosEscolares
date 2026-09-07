@@ -141,9 +141,65 @@ export default function Registros() {
                       <p className="text-xs text-slate-500">Nome do Aluno</p>
                       <p className="text-slate-800 font-medium">{selectedRegistro.nomeAluno}</p>
                     </div>
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="text-xs text-slate-500">Código do Aluno</p>
+                        <p className="text-slate-800 font-medium">ALU-{selectedRegistro.idAluno.substring(0, 8).toUpperCase()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">CPF</p>
+                        <p className="text-slate-800 font-medium">{selectedRegistro.cpfAluno || 'Não informado'}</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="text-xs text-slate-500">Data de Nasc.</p>
+                        <p className="text-slate-800 font-medium">
+                          {selectedRegistro.dataNascimento 
+                            ? new Date(selectedRegistro.dataNascimento).toLocaleDateString('pt-BR') 
+                            : 'Não informado'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">Nec. Especial?</p>
+                        <p className="text-slate-800 font-medium">{selectedRegistro.necessidadeEducacionalEspecial ? 'Sim' : 'Não'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Familia Info */}
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                  <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b pb-2">Dados da Família</h3>
+                  <div className="space-y-3">
                     <div>
-                      <p className="text-xs text-slate-500">Código do Aluno</p>
-                      <p className="text-slate-800 font-medium">ALU-{selectedRegistro.idAluno.substring(0, 8).toUpperCase()}</p>
+                      <p className="text-xs text-slate-500">Endereço Completo</p>
+                      <p className="text-slate-800 font-medium">
+                        {selectedRegistro.endereco}, {selectedRegistro.bairro} 
+                        {selectedRegistro.comunidade ? ` - ${selectedRegistro.comunidade}` : ''}
+                      </p>
+                    </div>
+                    <div className="flex justify-between">
+                      <div>
+                        <p className="text-xs text-slate-500">Renda Mensal</p>
+                        <p className="text-slate-800 font-medium">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedRegistro.rendaFamiliarMensal || 0)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">Benefício Social</p>
+                        <p className="text-slate-800 font-medium">
+                          {selectedRegistro.recebeBeneficioSocial ? selectedRegistro.beneficioSocial : 'Não recebe'}
+                        </p>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500">Acesso à Internet</p>
+                      <p className="text-slate-800 font-medium">
+                        {selectedRegistro.possuiInternetCasa 
+                          ? `Sim (${selectedRegistro.tipoAcessoInternet || 'Banda Larga'})` 
+                          : 'Não possui'}
+                      </p>
                     </div>
                   </div>
                 </div>

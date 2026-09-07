@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,10 +30,23 @@ public class RegistroColetaService : IRegistroColetaService
             {
                 IdRegistro          = r.IdRegistro,
                 IdAluno             = r.IdAluno,
-                NomeAluno           = r.Aluno?.NomeAluno ?? "",
+                NomeAluno           = r.Aluno != null ? r.Aluno.NomeAluno : "",
+                CpfAluno            = r.Aluno != null ? r.Aluno.CpfAluno : "",
+                DataNascimento      = r.Aluno != null ? r.Aluno.DataNascimento : null,
+                NecessidadeEducacionalEspecial = r.Aluno != null && r.Aluno.NecessidadeEducacionalEspecial,
+                
                 IdFamilia           = r.IdFamilia,
-                CodigoFamilia       = r.Familia?.CodigoFamilia ?? "",
-                PesquisadorNome     = r.Usuario?.Nome ?? "",
+                CodigoFamilia       = r.Familia != null ? r.Familia.CodigoFamilia : "",
+                Endereco            = r.Familia != null ? r.Familia.Endereco : "",
+                Bairro              = r.Familia != null ? r.Familia.Bairro : "",
+                Comunidade          = r.Familia != null ? r.Familia.Comunidade : "",
+                PossuiInternetCasa  = r.Familia != null && r.Familia.PossuiInternetCasa,
+                TipoAcessoInternet  = r.Familia != null ? r.Familia.TipoAcessoInternet : null,
+                RecebeBeneficioSocial = r.Familia != null && r.Familia.RecebeBeneficioSocial,
+                BeneficioSocial     = r.Familia != null ? r.Familia.BeneficioSocial : null,
+                RendaFamiliarMensal = r.Familia != null ? r.Familia.RendaFamiliarMensal : 0,
+
+                PesquisadorNome     = r.Usuario != null ? r.Usuario.Nome : "",
                 Observacao          = r.Observacao,
                 StatusSincronizacao = r.StatusSincronizacao,
                 DataColeta          = r.DataColeta,
@@ -54,10 +67,23 @@ public class RegistroColetaService : IRegistroColetaService
         {
             IdRegistro          = r.IdRegistro,
             IdAluno             = r.IdAluno,
-            NomeAluno           = r.Aluno?.NomeAluno ?? "",
+            NomeAluno           = r.Aluno != null ? r.Aluno.NomeAluno : "",
+            CpfAluno            = r.Aluno != null ? r.Aluno.CpfAluno : "",
+            DataNascimento      = r.Aluno != null ? r.Aluno.DataNascimento : null,
+            NecessidadeEducacionalEspecial = r.Aluno != null && r.Aluno.NecessidadeEducacionalEspecial,
+            
             IdFamilia           = r.IdFamilia,
-            CodigoFamilia       = r.Familia?.CodigoFamilia ?? "",
-            PesquisadorNome     = r.Usuario?.Nome ?? "",
+            CodigoFamilia       = r.Familia != null ? r.Familia.CodigoFamilia : "",
+            Endereco            = r.Familia != null ? r.Familia.Endereco : "",
+            Bairro              = r.Familia != null ? r.Familia.Bairro : "",
+            Comunidade          = r.Familia != null ? r.Familia.Comunidade : "",
+            PossuiInternetCasa  = r.Familia != null && r.Familia.PossuiInternetCasa,
+            TipoAcessoInternet  = r.Familia != null ? r.Familia.TipoAcessoInternet : null,
+            RecebeBeneficioSocial = r.Familia != null && r.Familia.RecebeBeneficioSocial,
+            BeneficioSocial     = r.Familia != null ? r.Familia.BeneficioSocial : null,
+            RendaFamiliarMensal = r.Familia != null ? r.Familia.RendaFamiliarMensal : 0,
+
+            PesquisadorNome     = r.Usuario != null ? r.Usuario.Nome : "",
             Observacao          = r.Observacao,
             StatusSincronizacao = r.StatusSincronizacao,
             DataColeta          = r.DataColeta,
