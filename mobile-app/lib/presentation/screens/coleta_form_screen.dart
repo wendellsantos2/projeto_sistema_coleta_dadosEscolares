@@ -68,31 +68,40 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
             icon: const Icon(Icons.auto_fix_high),
             tooltip: 'Preencher com Mock',
             onPressed: () {
+              final rng = Random();
+              final nomes = ['Ana Souza', 'Carlos Oliveira', 'Maria Lima', 'João Santos', 'Beatriz Costa'];
+              final enderecos = ['Rua Rio Negro, 101', 'Av. Torquato Tapajós, 450', 'Rua das Flores, 22', 'Trav. Coari, 88'];
+              final bairros = ['Alvorada', 'Cidade Nova', 'São Lázaro', 'Compensa', 'Ponta Negra'];
+              final parentescos = ['Mãe', 'Pai', 'Avó', 'Avô', 'Tio'];
+              final series = ['1º Ano EF', '3º Ano EF', '5º Ano EF', '7º Ano EF', '1º Ano EM'];
+              final nomeResp = nomes[rng.nextInt(nomes.length)];
+              final cpfBase = rng.nextInt(900000000) + 100000000;
               setState(() {
-                final rng = Random();
                 _nomeAlunoController.text = 'Aluno Mock ${rng.nextInt(1000)}';
-                _dataNascController.text = '2015-05-10';
-                _nomeRespController.text = 'Responsável Mock ${rng.nextInt(1000)}';
-                _cpfRespController.text = '${rng.nextInt(900) + 100}${rng.nextInt(900) + 100}${rng.nextInt(900) + 100}${rng.nextInt(90) + 10}';
-                _parentescoController.text = 'Pai';
-                _enderecoController.text = 'Rua Teste HTTP';
-                _bairroController.text = 'Bairro Mock';
-                _comunidadeController.text = 'Comunidade Y';
-                _rendaController.text = '1500';
-                _recebeBeneficio = true;
-                _cpfAlunoController.text = '${rng.nextInt(900) + 100}${rng.nextInt(900) + 100}${rng.nextInt(900) + 100}11';
+                _dataNascController.text = '201${rng.nextInt(5)}-0${rng.nextInt(9) + 1}-${(rng.nextInt(28) + 1).toString().padLeft(2, '0')}';
+                _nomeRespController.text = nomeResp;
+                _cpfRespController.text = '$cpfBase${rng.nextInt(90) + 10}';
+                _parentescoController.text = parentescos[rng.nextInt(parentescos.length)];
+                _enderecoController.text = enderecos[rng.nextInt(enderecos.length)];
+                _bairroController.text = bairros[rng.nextInt(bairros.length)];
+                _comunidadeController.text = 'Comunidade ${String.fromCharCode(65 + rng.nextInt(10))}';
+                _rendaController.text = '${(rng.nextInt(30) + 10) * 100}';
+                _cpfAlunoController.text = '${rng.nextInt(900000000) + 100000000}${rng.nextInt(90) + 10}';
                 _descNecessidadeController.text = '';
-                _telefoneRespController.text = '92999999999';
-                _emailRespController.text = 'mock@email.com';
-                _qtdMoradoresController.text = '4';
+                _telefoneRespController.text = '(92) 9${rng.nextInt(9000) + 1000}-${rng.nextInt(9000) + 1000}';
+                _emailRespController.text = '${nomeResp.toLowerCase().replaceAll(' ', '.')}@email.com';
+                _qtdMoradoresController.text = '${rng.nextInt(6) + 2}';
                 _beneficioDescController.text = 'Bolsa Família';
-                _tipoInternetController.text = 'Wi-Fi / Fibra';
-                _anoSerieController.text = '5º Ano Fundamental';
-                _meioTransporteController.text = 'Ônibus';
-                _tempoDeslocamentoController.text = '30';
-                _frequenciaController.text = '90';
-                _sexo = 'M';
-                _turno = 'Matutino';
+                _tipoInternetController.text = 'Wi-Fi residencial';
+                _anoSerieController.text = series[rng.nextInt(series.length)];
+                _meioTransporteController.text = ['Ônibus', 'A pé', 'Moto', 'Bicicleta'][rng.nextInt(4)];
+                _tempoDeslocamentoController.text = '${rng.nextInt(60) + 10}';
+                _frequenciaController.text = '${rng.nextInt(30) + 70}';
+                _sexo = rng.nextBool() ? 'M' : 'F';
+                _turno = ['Matutino', 'Vespertino', 'Integral'][rng.nextInt(3)];
+                _recebeBeneficio = rng.nextBool();
+                _possuiInternet = rng.nextBool();
+                _necessidadeEspecial = false;
               });
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Formulario preenchido com mock!')),
