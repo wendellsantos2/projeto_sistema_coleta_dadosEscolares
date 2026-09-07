@@ -184,6 +184,18 @@ class DashboardScreen extends StatelessWidget {
                             );
                           },
                         ),
+                        _buildActionCard(
+                          context,
+                          title: 'Ver Todos',
+                          icon: Icons.list_alt,
+                          color: Colors.deepPurple,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const TotalLocalScreen()),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ],
