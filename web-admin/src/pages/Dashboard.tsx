@@ -57,7 +57,7 @@ export default function Dashboard() {
             className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow text-slate-600 hover:text-blue-600 transition-colors"
           >
             <FileText className="w-5 h-5" />
-            Tabela de Registros
+            Ver Todas Informações
           </button>
           <button 
             onClick={logout}
@@ -148,6 +148,17 @@ export default function Dashboard() {
            <p className="text-slate-500 font-medium text-lg">Famílias declararam <br/> não possuir acesso à internet.</p>
         </div>
 
+      </div>
+
+      {/* Full width button to see all records */}
+      <div className="mt-8">
+        <button 
+          onClick={() => navigate('/registros')}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex items-center justify-center gap-3 text-lg"
+        >
+          <FileText className="w-6 h-6" />
+          Ver todas informações e registros detalhados
+        </button>
       </div>
     </div>
   );
