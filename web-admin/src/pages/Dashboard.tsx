@@ -103,9 +103,9 @@ export default function Dashboard() {
             onChange={e => setTurnoFilter(e.target.value)}
           >
             <option value="">Todos</option>
-            <option value="Manhã">Manhã</option>
-            <option value="Tarde">Tarde</option>
-            <option value="Noite">Noite</option>
+            <option value="Matutino">Matutino</option>
+            <option value="Vespertino">Vespertino</option>
+            <option value="Noturno">Noturno</option>
             <option value="Integral">Integral</option>
           </select>
         </div>

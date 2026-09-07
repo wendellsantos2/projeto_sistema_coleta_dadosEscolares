@@ -137,7 +137,8 @@ public class RegistroColetaService : IRegistroColetaService
         // Aplicar filtros
         if (!string.IsNullOrWhiteSpace(bairro))
         {
-            familiasQuery = familiasQuery.Where(f => f.Bairro == bairro);
+            var bairroTerm = bairro.ToLower();
+            familiasQuery = familiasQuery.Where(f => f.Bairro.ToLower().Contains(bairroTerm));
             var familiasIds = await familiasQuery.Select(f => f.IdFamilia).ToListAsync();
             alunosQuery = alunosQuery.Where(a => familiasIds.Contains(a.IdFamilia));
             registrosQuery = registrosQuery.Where(r => r.IdFamilia.HasValue && familiasIds.Contains(r.IdFamilia.Value));
