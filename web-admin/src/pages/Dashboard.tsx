@@ -77,8 +77,8 @@ export default function Dashboard() {
         <KPICard icon={<AlertTriangle />} title="Alunos com NEE" value={data.alunosComNecessidadeEspecial} color="text-orange-600" bg="bg-orange-100" />
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Charts Row 1 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         
         {/* Gráfico de Meio de Transporte */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
@@ -104,31 +104,35 @@ export default function Dashboard() {
               <BarChart data={data.distribuicaoRenda} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" />
-                <YAxis dataKey="faixa" type="category" width={100} />
+                <YAxis dataKey="faixa" type="category" width={120} />
                 <Tooltip cursor={{fill: 'transparent'}} />
                 <Bar dataKey="quantidade" fill="#10b981" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
 
-        {/* Gráfico de Benefícios Sociais (Pie) */}
+      {/* Charts Row 2 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        {/* Gráfico de Turno (Pie) */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 className="text-lg font-bold text-slate-700 mb-4">Famílias Recebendo Benefícios</h2>
-          <div className="h-[300px] w-full">
+          <h2 className="text-sm font-bold text-slate-700 mb-4 text-center">Turnos de Estudo</h2>
+          <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={data.distribuicaoBeneficios}
+                  data={data.distribuicaoTurno}
                   cx="50%"
                   cy="50%"
-                  outerRadius={100}
-                  fill="#8884d8"
+                  innerRadius={50}
+                  outerRadius={80}
                   dataKey="quantidade"
-                  nameKey="beneficio"
-                  label={({name, percent}) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  nameKey="turno"
+                  labelLine={false}
                 >
-                  {data.distribuicaoBeneficios.map((entry: any, index: number) => (
+                  {data.distribuicaoTurno.map((entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -139,13 +143,87 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Info Extra Card */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center items-center text-center">
-           <h2 className="text-lg font-bold text-slate-700 mb-6">Inclusão Digital</h2>
-           <div className="w-32 h-32 rounded-full border-8 border-indigo-100 flex items-center justify-center mb-4">
-             <span className="text-4xl font-black text-indigo-600">{data.familiasSemInternet}</span>
-           </div>
-           <p className="text-slate-500 font-medium text-lg">Famílias declararam <br/> não possuir acesso à internet.</p>
+        {/* Gráfico de Benefícios Sociais (Pie) */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h2 className="text-sm font-bold text-slate-700 mb-4 text-center">Benefícios Sociais</h2>
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data.distribuicaoBeneficios}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  dataKey="quantidade"
+                  nameKey="beneficio"
+                  labelLine={false}
+                >
+                  {data.distribuicaoBeneficios.map((entry: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Gráfico Acesso à Internet (Pie) */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h2 className="text-sm font-bold text-slate-700 mb-4 text-center">Acesso à Internet</h2>
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Sem Internet', value: data.familiasSemInternet },
+                    { name: 'Com Internet', value: data.totalFamilias - data.familiasSemInternet }
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  dataKey="value"
+                  labelLine={false}
+                >
+                  <Cell fill="#ef4444" />
+                  <Cell fill="#3b82f6" />
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Gráfico Necessidade Especial (Pie) */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h2 className="text-sm font-bold text-slate-700 mb-4 text-center">Necessidades Especiais</h2>
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Possui NEE', value: data.alunosComNecessidadeEspecial },
+                    { name: 'Não Possui', value: data.totalAlunos - data.alunosComNecessidadeEspecial }
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  dataKey="value"
+                  labelLine={false}
+                >
+                  <Cell fill="#f59e0b" />
+                  <Cell fill="#10b981" />
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
       </div>
