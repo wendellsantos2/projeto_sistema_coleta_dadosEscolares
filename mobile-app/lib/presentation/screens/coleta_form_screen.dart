@@ -54,10 +54,10 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
             tooltip: 'Preencher com Mock',
             onPressed: () {
               setState(() {
-                _nomeAlunoController.text = 'Joaozinho Mock';
-                _dataNascController.text = '2015-05-10';
-                _nomeRespController.text = 'Joao Mock Pai';
                 final rng = Random();
+                _nomeAlunoController.text = 'Aluno Mock ${rng.nextInt(1000)}';
+                _dataNascController.text = '2015-05-10';
+                _nomeRespController.text = 'Responsável Mock ${rng.nextInt(1000)}';
                 _cpfRespController.text = '${rng.nextInt(900) + 100}${rng.nextInt(900) + 100}${rng.nextInt(900) + 100}${rng.nextInt(90) + 10}';
                 _parentescoController.text = 'Pai';
                 _enderecoController.text = 'Rua Teste HTTP';
