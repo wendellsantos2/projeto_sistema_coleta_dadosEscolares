@@ -86,6 +86,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<Application.Interfaces.IFamiliaService, Application.Services.FamiliaService>();
 builder.Services.AddScoped<Application.Interfaces.ISyncService,    Application.Services.SyncService>();
 builder.Services.AddScoped<Application.Interfaces.IAuthService,    Application.Services.AuthService>();
+builder.Services.AddScoped<Application.Interfaces.IAlunoService,    Application.Services.AlunoService>();
+builder.Services.AddScoped<Application.Interfaces.IMatriculaService, Application.Services.MatriculaService>();
+builder.Services.AddScoped<Application.Interfaces.IRegistroColetaService, Application.Services.RegistroColetaService>();
+builder.Services.AddScoped<Application.Interfaces.IUsuarioService,   Application.Services.UsuarioService>();
 
 // ─────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();
