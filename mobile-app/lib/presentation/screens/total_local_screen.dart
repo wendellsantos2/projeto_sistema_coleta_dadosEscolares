@@ -1,9 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/provider.dart';
 import '../providers/sync_provider.dart';
 
 class TotalLocalScreen extends StatelessWidget {
   const TotalLocalScreen({Key? key}) : super(key: key);
+
+  void _showDetails(BuildContext context, String idRegistro) async {
+    final syncProvider = context.read<SyncProvider>();
+    final details = await syncProvider.getRecordDetails(idRegistro);
+    if (details == null || !context.mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Detalhes do Registro',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepPurple[800]),
+              textAlign: TextAlign.center,
+            ),
+            const Divider(height: 32),
+            Expanded(
+              child: ListView(
+                children: details.entries.map((e) {
+                  final key = e.key.replaceAll(RegExp(r'([A-Z])'), r' $1').toUpperCase();
+                  final val = e.value?.toString() ?? 'N/A';
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(key, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text(val, style: const TextStyle(fontSize: 16, color: Colors.black87)),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white, padding: const EdgeInsets.all(16)),
+              child: const Text('FECHAR'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +123,7 @@ class TotalLocalScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
+                  onTap: () => _showDetails(context, record['idRegistro'] as String),
                   leading: CircleAvatar(
                     backgroundColor: isPendente ? Colors.orange : Colors.green,
                     child: Icon(

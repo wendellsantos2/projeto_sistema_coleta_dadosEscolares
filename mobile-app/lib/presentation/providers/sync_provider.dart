@@ -55,6 +55,29 @@ class SyncProvider extends ChangeNotifier {
     return result;
   }
 
+  Future<Map<String, dynamic>?> getRecordDetails(String idRegistro) async {
+    final db = await DatabaseHelper.instance.database;
+    final List<Map<String, dynamic>> result = await db.rawQuery('''
+      SELECT 
+        a.nomeAluno, a.cpfAluno, a.dataNascimento, a.sexo, a.necessidadeEducacionalEspecial, a.descricaoNecessidade,
+        f.endereco, f.bairro, f.comunidade, f.qtdMoradores, f.rendaFamiliarMensal, f.recebeBeneficioSocial, f.beneficioSocial, f.possuiInternetCasa, f.tipoAcessoInternet,
+        resp.nomeResponsavel, resp.cpfResponsavel, resp.telefoneResponsavel, resp.emailResponsavel,
+        m.anoSerie, m.turno, m.frequenciaEscolarPct, m.meioTransporteEscola, m.tempoDeslocamentoMin,
+        r.dataColeta, r.statusSincronizacao, r.observacao
+      FROM registros_coleta r
+      INNER JOIN alunos a ON r.idAluno = a.idAluno
+      LEFT JOIN familias f ON a.idFamilia = f.idFamilia
+      LEFT JOIN alunos_responsaveis ar ON a.idAluno = ar.idAluno
+      LEFT JOIN responsaveis resp ON ar.idResponsavel = resp.idResponsavel
+      LEFT JOIN matriculas m ON a.idAluno = m.idAluno
+      WHERE r.idRegistro = ?
+      LIMIT 1
+    ''', [idRegistro]);
+    
+    if (result.isNotEmpty) return result.first;
+    return null;
+  }
+
   Future<void> syncData() async {
     if (_pendingCount == 0) return;
 
