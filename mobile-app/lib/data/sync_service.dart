@@ -40,8 +40,9 @@ class SyncService {
       // Busca Responsável
       final responsavelMap = (await db.query('responsaveis', where: 'idResponsavel = ?', whereArgs: [idResponsavel])).first;
 
-      // Busca Matrícula
-      final matriculaMap = (await db.query('matriculas', where: 'idAluno = ?', whereArgs: [idAluno])).first;
+      // Busca Matrícula (pode não existir em registros antigos)
+      final matriculaList = await db.query('matriculas', where: 'idAluno = ?', whereArgs: [idAluno]);
+      final matriculaMap = matriculaList.isNotEmpty ? matriculaList.first : null;
 
       final dto = ColetaSyncDto(
         idRegistro: idRegistro,
@@ -49,29 +50,29 @@ class SyncService {
         idAluno: idAluno,
         nomeAluno: alunoMap['nomeAluno'] as String,
         dataNascimento: alunoMap['dataNascimento'] as String,
-        sexo: alunoMap['sexo'] as String,
+        sexo: alunoMap['sexo'] as String? ?? '',
         cpfAluno: alunoMap['cpfAluno'] as String? ?? '',
-        necessidadeEducacionalEspecial: (alunoMap['necessidadeEducacionalEspecial'] as int) == 1,
+        necessidadeEducacionalEspecial: (alunoMap['necessidadeEducacionalEspecial'] as int? ?? 0) == 1,
         descricaoNecessidade: alunoMap['descricaoNecessidade'] as String? ?? '',
         nomeResponsavel: responsavelMap['nomeResponsavel'] as String,
         parentescoResponsavel: vinculoMap['parentescoResponsavel'] as String,
-        cpfResponsavel: responsavelMap['cpfResponsavel'] as String,
-        telefoneResponsavel: responsavelMap['telefoneResponsavel'] as String,
+        cpfResponsavel: responsavelMap['cpfResponsavel'] as String? ?? '',
+        telefoneResponsavel: responsavelMap['telefoneResponsavel'] as String? ?? '',
         emailResponsavel: responsavelMap['emailResponsavel'] as String? ?? '',
         endereco: familiaMap['endereco'] as String,
         bairro: familiaMap['bairro'] as String,
-        comunidade: familiaMap['comunidade'] as String,
-        qtdMoradores: familiaMap['qtdMoradores'] as int,
-        rendaFamiliarMensal: familiaMap['rendaFamiliarMensal'] as double,
-        recebeBeneficioSocial: (familiaMap['recebeBeneficioSocial'] as int) == 1,
+        comunidade: familiaMap['comunidade'] as String? ?? '',
+        qtdMoradores: familiaMap['qtdMoradores'] as int? ?? 0,
+        rendaFamiliarMensal: (familiaMap['rendaFamiliarMensal'] as num?)?.toDouble() ?? 0.0,
+        recebeBeneficioSocial: (familiaMap['recebeBeneficioSocial'] as int? ?? 0) == 1,
         beneficioSocial: familiaMap['beneficioSocial'] as String? ?? '',
-        possuiInternetCasa: (familiaMap['possuiInternetCasa'] as int) == 1,
+        possuiInternetCasa: (familiaMap['possuiInternetCasa'] as int? ?? 0) == 1,
         tipoAcessoInternet: familiaMap['tipoAcessoInternet'] as String? ?? '',
-        meioTransporteEscola: matriculaMap['meioTransporteEscola'] as String,
-        tempoDeslocamentoMin: matriculaMap['tempoDeslocamentoMin'] as int,
-        frequenciaEscolarPct: matriculaMap['frequenciaEscolarPct'] as double,
-        anoSerie: matriculaMap['anoSerie'] as String,
-        turno: matriculaMap['turno'] as String,
+        meioTransporteEscola: matriculaMap?['meioTransporteEscola'] as String? ?? '',
+        tempoDeslocamentoMin: matriculaMap?['tempoDeslocamentoMin'] as int? ?? 0,
+        frequenciaEscolarPct: (matriculaMap?['frequenciaEscolarPct'] as num?)?.toDouble() ?? 0.0,
+        anoSerie: matriculaMap?['anoSerie'] as String? ?? '',
+        turno: matriculaMap?['turno'] as String? ?? '',
         observacao: observacao ?? '',
       );
 
