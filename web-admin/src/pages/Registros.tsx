@@ -27,24 +27,35 @@ export default function Registros() {
 
   function exportToExcel() {
     const dataToExport = registros.map(r => ({
-      'Código Aluno': 'ALU-' + r.idAluno.substring(0,8).toUpperCase(),
-      'Nome Aluno': r.nomeAluno,
-      'CPF Aluno': r.cpfAluno || '',
-      'Data Nascimento': r.dataNascimento ? new Date(r.dataNascimento).toLocaleDateString('pt-BR') : '',
-      'Necessidade Especial': r.necessidadeEducacionalEspecial ? 'Sim' : 'Não',
-      'Endereço': r.endereco,
-      'Bairro': r.bairro,
-      'Comunidade': r.comunidade || '',
-      'Renda Mensal (R$)': r.rendaFamiliarMensal,
-      'Recebe Benefício': r.recebeBeneficioSocial ? 'Sim' : 'Não',
-      'Benefício': r.beneficioSocial || '',
-      'Possui Internet': r.possuiInternetCasa ? 'Sim' : 'Não',
-      'Tipo Acesso Internet': r.tipoAcessoInternet || '',
-      'Pesquisador': r.pesquisadorNome,
-      'Status Sincronização': r.statusSincronizacao,
-      'Data Coleta': new Date(r.dataColeta).toLocaleString('pt-BR'),
-      'Sincronizado Em': r.sincronizadoEm ? new Date(r.sincronizadoEm).toLocaleString('pt-BR') : '',
-      'Observação': r.observacao || ''
+      'id_registro': r.idRegistro,
+      'id_familia': r.idFamilia || r.codigoFamilia, // Usando o código se ID for null, mas mandamos os dois
+      'id_aluno': 'ALU-' + r.idAluno.substring(0,8).toUpperCase(),
+      'nome_aluno': r.nomeAluno,
+      'data_nascimento': r.dataNascimento ? new Date(r.dataNascimento).toLocaleDateString('pt-BR') : '',
+      'sexo': r.sexo || '',
+      'cpf_aluno': r.cpfAluno || '',
+      'nome_responsavel': r.nomeResponsavel || '',
+      'parentesco_responsavel': r.parentescoResponsavel || '',
+      'cpf_responsavel': r.cpfResponsavel || '',
+      'telefone_responsavel': r.telefoneResponsavel || '',
+      'email_responsavel': r.emailResponsavel || '',
+      'endereco': r.endereco,
+      'bairro': r.bairro,
+      'comunidade': r.comunidade || '',
+      'qtd_moradores': r.qtdMoradores || 0,
+      'renda_familiar_mensal': `R$ ${r.rendaFamiliarMensal.toFixed(2).replace('.', ',')}`,
+      'recebe_beneficio_social': r.recebeBeneficioSocial ? 'Sim' : 'Não',
+      'beneficio_social': r.beneficioSocial || '',
+      'possui_internet_casa': r.possuiInternetCasa ? 'Sim' : 'Não',
+      'tipo_acesso_internet': r.tipoAcessoInternet || '',
+      'meio_transporte_escola': r.meioTransporteEscola || '',
+      'tempo_deslocamento_min': r.tempoDeslocamentoMin || 0,
+      'frequencia_escolar_pct': `${r.frequenciaEscolarPct}%`,
+      'ano_serie': r.anoSerie || '',
+      'turno': r.turno || '',
+      'necessidade_educacional_especial': r.necessidadeEducacionalEspecial ? 'Sim' : 'Não',
+      'descricao_necessidade': r.descricaoNecessidade || '',
+      'observacao': r.observacao || ''
     }));
 
     const ws = XLSX.utils.json_to_sheet(dataToExport);

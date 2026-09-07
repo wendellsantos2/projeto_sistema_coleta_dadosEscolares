@@ -18,7 +18,9 @@ public class RegistroColetaService : IRegistroColetaService
     {
         var query = _context.RegistrosColeta
             .Include(r => r.Aluno)
+                .ThenInclude(a => a.Matriculas)
             .Include(r => r.Familia)
+                .ThenInclude(f => f.Responsaveis)
             .Include(r => r.Usuario)
             .AsQueryable();
 
@@ -29,23 +31,39 @@ public class RegistroColetaService : IRegistroColetaService
             .Select(r => new RegistroColetaResponseDto
             {
                 IdRegistro          = r.IdRegistro,
+                IdFamilia           = r.IdFamilia,
                 IdAluno             = r.IdAluno,
                 NomeAluno           = r.Aluno != null ? r.Aluno.NomeAluno : "",
-                CpfAluno            = r.Aluno != null ? r.Aluno.CpfAluno : "",
                 DataNascimento      = r.Aluno != null ? r.Aluno.DataNascimento : null,
-                NecessidadeEducacionalEspecial = r.Aluno != null && r.Aluno.NecessidadeEducacionalEspecial,
+                Sexo                = r.Aluno != null ? r.Aluno.Sexo : "",
+                CpfAluno            = r.Aluno != null ? r.Aluno.CpfAluno : "",
                 
-                IdFamilia           = r.IdFamilia,
-                CodigoFamilia       = r.Familia != null ? r.Familia.CodigoFamilia : "",
+                NomeResponsavel       = r.Familia != null && r.Familia.Responsaveis.Any() ? r.Familia.Responsaveis.First().NomeResponsavel : "",
+                ParentescoResponsavel = r.Familia != null && r.Familia.Responsaveis.Any() ? r.Familia.Responsaveis.First().ParentescoResponsavel : "",
+                CpfResponsavel        = r.Familia != null && r.Familia.Responsaveis.Any() ? r.Familia.Responsaveis.First().CpfResponsavel : "",
+                TelefoneResponsavel   = r.Familia != null && r.Familia.Responsaveis.Any() ? r.Familia.Responsaveis.First().TelefoneResponsavel : "",
+                EmailResponsavel      = r.Familia != null && r.Familia.Responsaveis.Any() ? r.Familia.Responsaveis.First().EmailResponsavel : "",
+
                 Endereco            = r.Familia != null ? r.Familia.Endereco : "",
                 Bairro              = r.Familia != null ? r.Familia.Bairro : "",
                 Comunidade          = r.Familia != null ? r.Familia.Comunidade : "",
-                PossuiInternetCasa  = r.Familia != null && r.Familia.PossuiInternetCasa,
-                TipoAcessoInternet  = r.Familia != null ? r.Familia.TipoAcessoInternet : null,
+                QtdMoradores        = r.Familia != null ? r.Familia.QtdMoradores : 0,
+                RendaFamiliarMensal = r.Familia != null ? r.Familia.RendaFamiliarMensal : 0,
                 RecebeBeneficioSocial = r.Familia != null && r.Familia.RecebeBeneficioSocial,
                 BeneficioSocial     = r.Familia != null ? r.Familia.BeneficioSocial : null,
-                RendaFamiliarMensal = r.Familia != null ? r.Familia.RendaFamiliarMensal : 0,
+                PossuiInternetCasa  = r.Familia != null && r.Familia.PossuiInternetCasa,
+                TipoAcessoInternet  = r.Familia != null ? r.Familia.TipoAcessoInternet : null,
 
+                MeioTransporteEscola = r.Aluno != null && r.Aluno.Matriculas.Any() ? r.Aluno.Matriculas.First().MeioTransporteEscola : "",
+                TempoDeslocamentoMin = r.Aluno != null && r.Aluno.Matriculas.Any() ? r.Aluno.Matriculas.First().TempoDeslocamentoMin : 0,
+                FrequenciaEscolarPct = r.Aluno != null && r.Aluno.Matriculas.Any() ? r.Aluno.Matriculas.First().FrequenciaEscolarPct : 0,
+                AnoSerie             = r.Aluno != null && r.Aluno.Matriculas.Any() ? r.Aluno.Matriculas.First().AnoSerie : "",
+                Turno                = r.Aluno != null && r.Aluno.Matriculas.Any() ? r.Aluno.Matriculas.First().Turno : "",
+
+                NecessidadeEducacionalEspecial = r.Aluno != null && r.Aluno.NecessidadeEducacionalEspecial,
+                DescricaoNecessidade = r.Aluno != null ? r.Aluno.DescricaoNecessidade : null,
+
+                CodigoFamilia       = r.Familia != null ? r.Familia.CodigoFamilia : "",
                 PesquisadorNome     = r.Usuario != null ? r.Usuario.Nome : "",
                 Observacao          = r.Observacao,
                 StatusSincronizacao = r.StatusSincronizacao,
@@ -58,7 +76,9 @@ public class RegistroColetaService : IRegistroColetaService
     {
         var r = await _context.RegistrosColeta
             .Include(r => r.Aluno)
+                .ThenInclude(a => a.Matriculas)
             .Include(r => r.Familia)
+                .ThenInclude(f => f.Responsaveis)
             .Include(r => r.Usuario)
             .FirstOrDefaultAsync(r => r.IdRegistro == id);
         if (r is null) return null;
@@ -66,23 +86,39 @@ public class RegistroColetaService : IRegistroColetaService
         return new RegistroColetaResponseDto
         {
             IdRegistro          = r.IdRegistro,
+            IdFamilia           = r.IdFamilia,
             IdAluno             = r.IdAluno,
             NomeAluno           = r.Aluno != null ? r.Aluno.NomeAluno : "",
-            CpfAluno            = r.Aluno != null ? r.Aluno.CpfAluno : "",
             DataNascimento      = r.Aluno != null ? r.Aluno.DataNascimento : null,
-            NecessidadeEducacionalEspecial = r.Aluno != null && r.Aluno.NecessidadeEducacionalEspecial,
+            Sexo                = r.Aluno != null ? r.Aluno.Sexo : "",
+            CpfAluno            = r.Aluno != null ? r.Aluno.CpfAluno : "",
             
-            IdFamilia           = r.IdFamilia,
-            CodigoFamilia       = r.Familia != null ? r.Familia.CodigoFamilia : "",
+            NomeResponsavel       = r.Familia != null && r.Familia.Responsaveis.Any() ? r.Familia.Responsaveis.First().NomeResponsavel : "",
+            ParentescoResponsavel = r.Familia != null && r.Familia.Responsaveis.Any() ? r.Familia.Responsaveis.First().ParentescoResponsavel : "",
+            CpfResponsavel        = r.Familia != null && r.Familia.Responsaveis.Any() ? r.Familia.Responsaveis.First().CpfResponsavel : "",
+            TelefoneResponsavel   = r.Familia != null && r.Familia.Responsaveis.Any() ? r.Familia.Responsaveis.First().TelefoneResponsavel : "",
+            EmailResponsavel      = r.Familia != null && r.Familia.Responsaveis.Any() ? r.Familia.Responsaveis.First().EmailResponsavel : "",
+
             Endereco            = r.Familia != null ? r.Familia.Endereco : "",
             Bairro              = r.Familia != null ? r.Familia.Bairro : "",
             Comunidade          = r.Familia != null ? r.Familia.Comunidade : "",
-            PossuiInternetCasa  = r.Familia != null && r.Familia.PossuiInternetCasa,
-            TipoAcessoInternet  = r.Familia != null ? r.Familia.TipoAcessoInternet : null,
+            QtdMoradores        = r.Familia != null ? r.Familia.QtdMoradores : 0,
+            RendaFamiliarMensal = r.Familia != null ? r.Familia.RendaFamiliarMensal : 0,
             RecebeBeneficioSocial = r.Familia != null && r.Familia.RecebeBeneficioSocial,
             BeneficioSocial     = r.Familia != null ? r.Familia.BeneficioSocial : null,
-            RendaFamiliarMensal = r.Familia != null ? r.Familia.RendaFamiliarMensal : 0,
+            PossuiInternetCasa  = r.Familia != null && r.Familia.PossuiInternetCasa,
+            TipoAcessoInternet  = r.Familia != null ? r.Familia.TipoAcessoInternet : null,
 
+            MeioTransporteEscola = r.Aluno != null && r.Aluno.Matriculas.Any() ? r.Aluno.Matriculas.First().MeioTransporteEscola : "",
+            TempoDeslocamentoMin = r.Aluno != null && r.Aluno.Matriculas.Any() ? r.Aluno.Matriculas.First().TempoDeslocamentoMin : 0,
+            FrequenciaEscolarPct = r.Aluno != null && r.Aluno.Matriculas.Any() ? r.Aluno.Matriculas.First().FrequenciaEscolarPct : 0,
+            AnoSerie             = r.Aluno != null && r.Aluno.Matriculas.Any() ? r.Aluno.Matriculas.First().AnoSerie : "",
+            Turno                = r.Aluno != null && r.Aluno.Matriculas.Any() ? r.Aluno.Matriculas.First().Turno : "",
+
+            NecessidadeEducacionalEspecial = r.Aluno != null && r.Aluno.NecessidadeEducacionalEspecial,
+            DescricaoNecessidade = r.Aluno != null ? r.Aluno.DescricaoNecessidade : null,
+
+            CodigoFamilia       = r.Familia != null ? r.Familia.CodigoFamilia : "",
             PesquisadorNome     = r.Usuario != null ? r.Usuario.Nome : "",
             Observacao          = r.Observacao,
             StatusSincronizacao = r.StatusSincronizacao,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import api from '../services/api';
-import { Users, Home, TrendingUp, AlertTriangle, LogOut, FileText } from 'lucide-react';
+import { Users, Home, TrendingUp, AlertTriangle, LogOut, FileText, Filter } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,18 +13,27 @@ export default function Dashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [bairroFilter, setBairroFilter] = useState('');
+  const [turnoFilter, setTurnoFilter] = useState('');
+
+  async function loadData() {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (bairroFilter) params.append('bairro', bairroFilter);
+      if (turnoFilter) params.append('turno', turnoFilter);
+
+      const response = await api.get(`/RegistrosColeta/dashboard?${params.toString()}`);
+      setData(response.data);
+      setError('');
+    } catch (err) {
+      setError('Erro ao carregar dados do dashboard.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const response = await api.get('/RegistrosColeta/dashboard');
-        setData(response.data);
-      } catch (err) {
-        setError('Erro ao carregar dados do dashboard.');
-      } finally {
-        setLoading(false);
-      }
-    }
     loadData();
   }, []);
 
@@ -67,6 +76,45 @@ export default function Dashboard() {
             Sair
           </button>
         </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-end gap-4 mb-8">
+        <div className="flex items-center gap-2 text-slate-600 font-bold mb-1">
+          <Filter className="w-5 h-5" />
+          Filtros:
+        </div>
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-xs font-medium text-slate-500 mb-1">Bairro</label>
+          <input 
+            type="text" 
+            placeholder="Ex: Centro, Bairro Nobre..."
+            className="w-full p-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 text-sm"
+            value={bairroFilter}
+            onChange={e => setBairroFilter(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && loadData()}
+          />
+        </div>
+        <div className="flex-1 min-w-[200px]">
+          <label className="block text-xs font-medium text-slate-500 mb-1">Turno</label>
+          <select 
+            className="w-full p-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 text-sm"
+            value={turnoFilter}
+            onChange={e => setTurnoFilter(e.target.value)}
+          >
+            <option value="">Todos</option>
+            <option value="Manhã">Manhã</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Noite">Noite</option>
+            <option value="Integral">Integral</option>
+          </select>
+        </div>
+        <button 
+          onClick={loadData}
+          className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+        >
+          Aplicar Filtros
+        </button>
       </div>
 
       {/* KPI Cards */}
