@@ -34,10 +34,20 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text('Nova Coleta', style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.deepPurple, Colors.indigo],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.auto_fix_high),
@@ -85,7 +95,7 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                           title: const Text('Necessidade Educacional Especial?'),
                           value: _necessidadeEspecial,
                           onChanged: (v) => setState(() => _necessidadeEspecial = v),
-                          activeColor: Colors.blue,
+                          activeColor: Colors.deepPurple,
                         ),
                       ],
                     ),
@@ -118,14 +128,14 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                           title: const Text('Recebe Benefício Social?'),
                           value: _recebeBeneficio,
                           onChanged: (v) => setState(() => _recebeBeneficio = v),
-                          activeColor: Colors.blue,
+                          activeColor: Colors.deepPurple,
                         ),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Possui Internet em Casa?'),
                           value: _possuiInternet,
                           onChanged: (v) => setState(() => _possuiInternet = v),
-                          activeColor: Colors.blue,
+                          activeColor: Colors.deepPurple,
                         ),
                       ],
                     ),
@@ -134,9 +144,9 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        backgroundColor: Colors.green,
+                        backgroundColor: Colors.deepPurple,
                         foregroundColor: Colors.white,
-                        elevation: 2,
+                        elevation: 4,
                       ),
                       onPressed: _salvarColetaLocal,
                       icon: const Icon(Icons.save),
@@ -165,7 +175,7 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                 ),
               ],
             ),
@@ -186,10 +196,11 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
           labelText: label,
           prefixIcon: Icon(icon, color: Colors.grey),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
           ),
           filled: true,
-          fillColor: Colors.grey[50],
+          fillColor: Colors.grey.shade100,
         ),
         keyboardType: keyboardType,
         validator: (val) => val == null || val.trim().isEmpty ? 'Obrigatório' : null,

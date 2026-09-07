@@ -16,10 +16,20 @@ class DashboardScreen extends StatelessWidget {
     final syncProvider = context.watch<SyncProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text('Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.deepPurple, Colors.indigo],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.exit_to_app),
@@ -50,8 +60,8 @@ class DashboardScreen extends StatelessWidget {
                     Text(
                       'Bem-vindo, Coletor!',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueGrey[800],
+                            fontWeight: FontWeight.w800,
+                            color: Colors.deepPurple[800],
                           ),
                     ),
                     const SizedBox(height: 24),
@@ -97,7 +107,8 @@ class DashboardScreen extends StatelessWidget {
                     Text(
                       'Ações Rápidas',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.deepPurple[800],
                           ),
                     ),
                     const SizedBox(height: 16),
@@ -115,7 +126,7 @@ class DashboardScreen extends StatelessWidget {
                           context,
                           title: 'Nova Coleta',
                           icon: Icons.add_circle_outline,
-                          color: Colors.green,
+                          color: Colors.teal,
                           onTap: () {
                             Navigator.push(
                               context,
@@ -158,7 +169,7 @@ class DashboardScreen extends StatelessWidget {
                           context,
                           title: 'Apagar Dados',
                           icon: Icons.delete_sweep,
-                          color: Colors.redAccent,
+                          color: Colors.red.shade400,
                           onTap: () => _showDeleteConfirmation(context),
                         ),
                         _buildActionCard(

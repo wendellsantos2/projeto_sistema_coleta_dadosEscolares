@@ -10,10 +10,20 @@ class PendentesScreen extends StatelessWidget {
     final syncProvider = context.watch<SyncProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Coletas Pendentes', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Registros Pendentes', style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.deepPurple, Colors.indigo],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        foregroundColor: Colors.white,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: syncProvider.getPendingRecordsList(),
@@ -55,13 +65,27 @@ class PendentesScreen extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Colors.orange,
-                    child: Icon(Icons.sync_problem, color: Colors.white),
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.orange.shade100,
+                    child: const Icon(Icons.sync_problem, color: Colors.deepOrange),
                   ),
-                  title: Text(nomeAluno, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(nomeAluno, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.deepPurple)),
                   subtitle: Text('Coletado em: ${dataColeta.split('T').first}'),
-                  trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+                  trailing: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade100,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Pendente',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepOrange,
+                      ),
+                    ),
+                  ),
                 ),
               );
             },
