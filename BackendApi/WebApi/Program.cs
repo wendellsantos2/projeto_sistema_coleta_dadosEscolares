@@ -104,7 +104,7 @@ using (var scope = app.Services.CreateScope())
     {
         new { Email = "admin@coleta.com", Nome = "Administrador", Perfil = "ADMIN" },
         new { Email = "gestor@coleta.com", Nome = "Gestor Escolar", Perfil = "GESTOR" },
-        new { Email = "pesquisador@coleta.com", Nome = "Pesquisador Campo", Perfil = "PESQUISADOR" }
+        new { Email = "pesquisador@coleta.com", Nome = "Wendell Santos", Perfil = "PESQUISADOR" }
     };
 
     foreach (var u in usersToSeed)
@@ -124,10 +124,20 @@ using (var scope = app.Services.CreateScope())
         }
         else
         {
-            // Força a atualização da senha para BCrypt caso esteja em texto puro
+            // Força a atualização da senha para BCrypt e o nome caso tenha mudado
+            bool modified = false;
             if (!existingUser.SenhaHash.StartsWith("$2"))
             {
                 existingUser.SenhaHash = BCrypt.Net.BCrypt.HashPassword("admin123");
+                modified = true;
+            }
+            if (existingUser.Nome != u.Nome)
+            {
+                existingUser.Nome = u.Nome;
+                modified = true;
+            }
+            if (modified)
+            {
                 db.Usuarios.Update(existingUser);
             }
         }
