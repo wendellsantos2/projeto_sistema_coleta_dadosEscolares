@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../providers/sync_provider.dart';
 import 'coleta_form_screen.dart';
 import 'pendentes_screen.dart';
+import 'total_local_screen.dart';
 import '../../core/database_helper.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -81,6 +82,12 @@ class DashboardScreen extends StatelessWidget {
                             value: syncProvider.totalCount.toString(),
                             icon: Icons.storage,
                             color: Colors.blue,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const TotalLocalScreen()),
+                              );
+                            },
                           ),
                         ),
                       ],
@@ -123,11 +130,22 @@ class DashboardScreen extends StatelessWidget {
                           color: Colors.blue,
                           onTap: syncProvider.pendingCount > 0
                               ? () async {
-                                  await context.read<SyncProvider>().syncData();
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Sincronizacao concluida!')),
-                                    );
+                                  try {
+                                    await context.read<SyncProvider>().syncData();
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Sincronizacao concluida!')),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Erro: $e'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   }
                                 }
                               : () {

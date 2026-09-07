@@ -35,10 +35,21 @@ class SyncProvider extends ChangeNotifier {
   Future<List<Map<String, dynamic>>> getPendingRecordsList() async {
     final db = await DatabaseHelper.instance.database;
     final List<Map<String, dynamic>> result = await db.rawQuery('''
-      SELECT r.idRegistro, r.dataColeta, a.nomeAluno 
+      SELECT r.idRegistro, r.dataColeta, a.nomeAluno, r.statusSincronizacao 
       FROM registros_coleta r
       INNER JOIN alunos a ON r.idAluno = a.idAluno
       WHERE r.statusSincronizacao = 'PENDENTE'
+      ORDER BY r.dataColeta DESC
+    ''');
+    return result;
+  }
+
+  Future<List<Map<String, dynamic>>> getTotalRecordsList() async {
+    final db = await DatabaseHelper.instance.database;
+    final List<Map<String, dynamic>> result = await db.rawQuery('''
+      SELECT r.idRegistro, r.dataColeta, a.nomeAluno, r.statusSincronizacao 
+      FROM registros_coleta r
+      INNER JOIN alunos a ON r.idAluno = a.idAluno
       ORDER BY r.dataColeta DESC
     ''');
     return result;
@@ -54,6 +65,7 @@ class SyncProvider extends ChangeNotifier {
       await _syncService.syncPendingRecords();
     } catch (e) {
       print('Erro no sync: $e');
+      rethrow;
     } finally {
       _isSyncing = false;
       await checkPending();
