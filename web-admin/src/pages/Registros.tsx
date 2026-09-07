@@ -55,7 +55,7 @@ export default function Registros() {
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-sm font-semibold text-slate-600">
                   <th className="p-4">Data da Coleta</th>
-                  <th className="p-4">Código Família</th>
+                  <th className="p-4">Código Aluno</th>
                   <th className="p-4">Aluno</th>
                   <th className="p-4">Pesquisador</th>
                   <th className="p-4">Status</th>
@@ -75,7 +75,9 @@ export default function Registros() {
                         {new Date(reg.dataColeta).toLocaleDateString('pt-BR')} <br/>
                         <span className="text-xs text-slate-400">{new Date(reg.dataColeta).toLocaleTimeString('pt-BR')}</span>
                       </td>
-                      <td className="p-4 text-sm font-medium text-slate-800">{reg.codigoFamilia}</td>
+                      <td className="p-4 text-sm font-medium text-slate-800">
+                        ALU-{reg.idAluno.substring(0, 8).toUpperCase()}
+                      </td>
                       <td className="p-4 text-sm text-slate-700">{reg.nomeAluno}</td>
                       <td className="p-4 text-sm text-slate-700">{reg.pesquisadorNome}</td>
                       <td className="p-4">
