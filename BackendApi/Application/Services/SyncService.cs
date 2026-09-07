@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,7 +33,7 @@ public class SyncService : ISyncService
                     familia = new Familia
                     {
                         IdFamilia             = dto.IdFamilia,
-                        CodigoFamilia         = $"FAM-SYNC-{dto.IdFamilia.ToString()[..8]}",
+                        CodigoFamilia         = $"FAM-SYNC-{Guid.NewGuid().ToString()[..8]}",
                         Endereco              = dto.Endereco,
                         Bairro                = dto.Bairro,
                         Comunidade            = dto.Comunidade,

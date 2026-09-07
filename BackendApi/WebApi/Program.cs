@@ -1,4 +1,4 @@
-﻿using Infra.Context;
+using Infra.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -94,11 +94,45 @@ builder.Services.AddScoped<Application.Interfaces.IUsuarioService,   Application
 // ─────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
-// ── Aplicar Migrations automaticamente ao iniciar ────────────────────────────
+// ── Aplicar Migrations automaticamente ao iniciar e Seedar Admin/Gestor/Pesquisador ──
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ColetaDbContext>();
     db.Database.Migrate();
+
+    var usersToSeed = new[]
+    {
+        new { Email = "admin@coleta.com", Nome = "Administrador", Perfil = "ADMIN" },
+        new { Email = "gestor@coleta.com", Nome = "Gestor Escolar", Perfil = "GESTOR" },
+        new { Email = "pesquisador@coleta.com", Nome = "Pesquisador Campo", Perfil = "PESQUISADOR" }
+    };
+
+    foreach (var u in usersToSeed)
+    {
+        var existingUser = db.Usuarios.FirstOrDefault(x => x.Email == u.Email);
+        if (existingUser == null)
+        {
+            db.Usuarios.Add(new Entities.Models.Usuario
+            {
+                Nome = u.Nome,
+                Email = u.Email,
+                SenhaHash = BCrypt.Net.BCrypt.HashPassword("admin123"), // Senha padrao
+                Perfil = u.Perfil,
+                Ativo = true,
+                DataCriacao = DateTime.UtcNow
+            });
+        }
+        else
+        {
+            // Força a atualização da senha para BCrypt caso esteja em texto puro
+            if (!existingUser.SenhaHash.StartsWith("$2"))
+            {
+                existingUser.SenhaHash = BCrypt.Net.BCrypt.HashPassword("admin123");
+                db.Usuarios.Update(existingUser);
+            }
+        }
+    }
+    db.SaveChanges();
 }
 
 // ── Pipeline ──────────────────────────────────────────────────────────────────
@@ -110,7 +144,7 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseCors("DevPolicy");
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

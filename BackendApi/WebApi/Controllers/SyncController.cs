@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -12,7 +12,7 @@ namespace WebApi.Controllers;
 /// <summary>Sincronizacao em lote dos registros coletados offline no mobile.</summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "PESQUISADOR,ADMIN")]
+[Authorize(Roles = "PESQUISADOR,GESTOR,ADMIN")]
 [Produces("application/json")]
 [Tags("Sincronizacao (Mobile)")]
 public class SyncController : ControllerBase
@@ -43,7 +43,8 @@ public class SyncController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Erro ao sincronizar.", error = ex.Message });
+            var innerMsg = ex.InnerException?.Message ?? ex.Message;
+            return StatusCode(500, new { message = "Erro ao sincronizar.", error = innerMsg });
         }
     }
 }

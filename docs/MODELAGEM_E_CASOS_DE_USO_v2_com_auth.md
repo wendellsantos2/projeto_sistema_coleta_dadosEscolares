@@ -228,6 +228,38 @@ POST /auth/refresh { refresh_token }
 - **Gestor Escolar (Web):** Analisa os dados coletados no painel web.
 - **Administrador:** Gerencia usuários e configurações do sistema.
 
+### Diagrama de Casos de Uso
+
+```mermaid
+graph LR
+    %% Atores
+    P((Pesquisador))
+    G((Gestor Escolar))
+    A((Administrador))
+
+    %% Sistema
+    subgraph Sistema de Coleta Escolar
+        UC0([UC00 - Autenticar no Sistema])
+        UC1([UC01 - Coletar Dados Offline])
+        UC2([UC02 - Sincronizar Dados])
+        UC3([UC03 - Visualizar Dashboard])
+        UC4([UC04 - Gerenciar Usuários])
+    end
+
+    %% Relações
+    P --> UC0
+    P --> UC1
+    P --> UC2
+
+    G --> UC0
+    G --> UC3
+
+    A --> UC0
+    A --> UC3
+    A --> UC4
+```
+
+
 ### UC00 - Autenticar no Sistema (Mobile / Web) *(novo)*
 - **Ator:** Qualquer usuário
 - **Fluxo Principal:**

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -44,7 +44,7 @@ public class AuthService : IAuthService
             Id = Guid.NewGuid(),
             Nome = cadastroDto.Nome ?? cadastroDto.Email,
             Email = cadastroDto.Email,
-            SenhaHash = cadastroDto.Senha,
+            SenhaHash = BCrypt.Net.BCrypt.HashPassword(cadastroDto.Senha),
             Perfil = perfil,
             Ativo = true
         };
@@ -56,9 +56,9 @@ public class AuthService : IAuthService
     public async Task<TokenDto> LoginAsync(LoginDto loginDto)
     {
         var usuario = await _context.Usuarios
-            .FirstOrDefaultAsync(u => u.Email == loginDto.Email && u.SenhaHash == loginDto.Senha);
+            .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
-        if (usuario == null)
+        if (usuario == null || !BCrypt.Net.BCrypt.Verify(loginDto.Senha, usuario.SenhaHash))
             throw new UnauthorizedAccessException("Usuario ou senha invalidos.");
 
         if (!usuario.Ativo)

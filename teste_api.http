@@ -1,0 +1,80 @@
+@baseUrl = http://localhost:5250/api
+@adminEmail = admin@coleta.com
+@adminSenha = admin123
+
+### 1. LOGIN
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "senha": "{{adminSenha}}"
+}
+
+### Extrair o Token da resposta do Login
+# O VS Code (REST Client) pega o token automaticamente na variavel abaixo
+@token = {{login.response.body.token}}
+
+
+### 2. LISTAR USUARIOS (Requer Autenticacao)
+GET {{baseUrl}}/usuarios
+Authorization: Bearer {{token}}
+
+
+### 3. CRIAR NOVO USUARIO (ADMIN)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nome": "Pesquisador Teste",
+  "email": "pesquisador@coleta.com",
+  "senha": "senhaforte123",
+  "perfil": "PESQUISADOR",
+  "ativo": true
+}
+
+
+### 4. SINCRONIZAR COLETA (Teste de Carga do App Mobile)
+POST {{baseUrl}}/sync
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "registros": [
+    {
+      "idLocal": "550e8400-e29b-41d4-a716-446655440000",
+      "dataColeta": "2026-09-06T15:00:00Z",
+      "observacao": "Teste via HTTP File",
+      "familia": {
+        "codigoFamilia": "FAM-999",
+        "nomeResponsavel": "Joao Teste",
+        "cpfResponsavel": "12345678900",
+        "telefoneResponsavel": "999999999",
+        "endereco": "Rua Teste",
+        "bairro": "Bairro",
+        "comunidade": "Comunidade X",
+        "qtdMoradores": 4,
+        "rendaFamiliarMensal": 1500.0,
+        "recebeBeneficioSocial": true,
+        "possuiInternetCasa": true
+      },
+      "aluno": {
+        "codigoAluno": "ALU-999",
+        "nome": "Joaozinho Teste",
+        "dataNascimento": "2015-05-10",
+        "sexo": "M",
+        "parentescoResponsavel": "Pai",
+        "necessidadeEducacionalEspecial": false
+      },
+      "matricula": {
+        "anoSerie": "5º Ano",
+        "turno": "Matutino",
+        "frequenciaEscolarPct": 95,
+        "meioTransporteEscola": "A pe",
+        "tempoDeslocamentoMin": 15
+      }
+    }
+  ]
+}
