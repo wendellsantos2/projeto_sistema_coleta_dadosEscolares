@@ -17,7 +17,16 @@ export default function Alunos() {
     sexo: '',
     cpfAluno: '',
     necessidadeEducacionalEspecial: false,
-    descricaoNecessidade: ''
+    descricaoNecessidade: '',
+    // Familia fields
+    endereco: '',
+    bairro: '',
+    comunidade: '',
+    rendaFamiliarMensal: 0,
+    recebeBeneficioSocial: false,
+    beneficioSocial: '',
+    possuiInternetCasa: false,
+    tipoAcessoInternet: ''
   });
   const [saving, setSaving] = useState(false);
 
@@ -53,23 +62,66 @@ export default function Alunos() {
     }
   }
 
-  function handleEditClick(aluno: any) {
+  async function handleEditClick(aluno: any) {
     setEditingAluno(aluno);
-    setFormData({
-      nomeAluno: aluno.nomeAluno,
-      dataNascimento: aluno.dataNascimento ? aluno.dataNascimento.split('T')[0] : '',
-      sexo: aluno.sexo,
-      cpfAluno: aluno.cpfAluno || '',
-      necessidadeEducacionalEspecial: aluno.necessidadeEducacionalEspecial,
-      descricaoNecessidade: aluno.descricaoNecessidade || ''
-    });
+    
+    // Fetch familia para edição
+    try {
+      const respFam = await api.get(`/Familias/${aluno.idFamilia}`);
+      const fam = respFam.data;
+      
+      setFormData({
+        nomeAluno: aluno.nomeAluno,
+        dataNascimento: aluno.dataNascimento ? aluno.dataNascimento.split('T')[0] : '',
+        sexo: aluno.sexo,
+        cpfAluno: aluno.cpfAluno || '',
+        necessidadeEducacionalEspecial: aluno.necessidadeEducacionalEspecial,
+        descricaoNecessidade: aluno.descricaoNecessidade || '',
+        
+        endereco: fam.endereco || '',
+        bairro: fam.bairro || '',
+        comunidade: fam.comunidade || '',
+        rendaFamiliarMensal: fam.rendaFamiliarMensal || 0,
+        recebeBeneficioSocial: fam.recebeBeneficioSocial || false,
+        beneficioSocial: fam.beneficioSocial || '',
+        possuiInternetCasa: fam.possuiInternetCasa || false,
+        tipoAcessoInternet: fam.tipoAcessoInternet || ''
+      });
+    } catch (e) {
+      alert('Erro ao carregar dados da família.');
+      setEditingAluno(null);
+    }
   }
 
   async function handleUpdateFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.put(`/Alunos/${editingAluno.idAluno}`, formData);
+      // Atualiza aluno
+      const p1 = api.put(`/Alunos/${editingAluno.idAluno}`, {
+        nomeAluno: formData.nomeAluno,
+        dataNascimento: formData.dataNascimento,
+        sexo: formData.sexo,
+        cpfAluno: formData.cpfAluno,
+        necessidadeEducacionalEspecial: formData.necessidadeEducacionalEspecial,
+        descricaoNecessidade: formData.descricaoNecessidade
+      });
+      
+      // Atualiza familia
+      const p2 = api.put(`/Familias/${editingAluno.idFamilia}`, {
+        endereco: formData.endereco,
+        bairro: formData.bairro,
+        comunidade: formData.comunidade,
+        qtdMoradores: 3, // mock, pois não editamos
+        rendaFamiliarMensal: formData.rendaFamiliarMensal,
+        recebeBeneficioSocial: formData.recebeBeneficioSocial,
+        beneficioSocial: formData.beneficioSocial,
+        possuiInternetCasa: formData.possuiInternetCasa,
+        tipoAcessoInternet: formData.tipoAcessoInternet
+      });
+
+      await Promise.all([p1, p2]);
+      
       setEditingAluno(null);
       fetchAlunos(); // recarrega
     } catch (err: any) {
@@ -246,6 +298,104 @@ export default function Alunos() {
                       />
                     </div>
                   )}
+
+                  <hr className="my-6 border-slate-200" />
+                  <h4 className="font-bold text-slate-800 mb-2">Dados da Família (Endereço e Renda)</h4>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Endereço Completo</label>
+                      <input 
+                        type="text" 
+                        required
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        value={formData.endereco}
+                        onChange={e => setFormData({...formData, endereco: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Bairro</label>
+                      <input 
+                        type="text" 
+                        required
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        value={formData.bairro}
+                        onChange={e => setFormData({...formData, bairro: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Comunidade (Opcional)</label>
+                      <input 
+                        type="text" 
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        value={formData.comunidade}
+                        onChange={e => setFormData({...formData, comunidade: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Renda Familiar Mensal (R$)</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        required
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        value={formData.rendaFamiliarMensal}
+                        onChange={e => setFormData({...formData, rendaFamiliarMensal: parseFloat(e.target.value) || 0})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Recebe Benefício Social?</label>
+                      <select 
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        value={formData.recebeBeneficioSocial ? 'Sim' : 'Não'}
+                        onChange={e => setFormData({...formData, recebeBeneficioSocial: e.target.value === 'Sim'})}
+                      >
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {formData.recebeBeneficioSocial && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Qual Benefício?</label>
+                      <input 
+                        type="text" 
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        value={formData.beneficioSocial}
+                        onChange={e => setFormData({...formData, beneficioSocial: e.target.value})}
+                      />
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Possui Internet?</label>
+                      <select 
+                        className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        value={formData.possuiInternetCasa ? 'Sim' : 'Não'}
+                        onChange={e => setFormData({...formData, possuiInternetCasa: e.target.value === 'Sim'})}
+                      >
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                      </select>
+                    </div>
+                    {formData.possuiInternetCasa && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Tipo de Acesso</label>
+                        <input 
+                          type="text" 
+                          placeholder="Ex: Banda Larga, Celular"
+                          className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                          value={formData.tipoAcessoInternet}
+                          onChange={e => setFormData({...formData, tipoAcessoInternet: e.target.value})}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mt-8 flex justify-end gap-3">
