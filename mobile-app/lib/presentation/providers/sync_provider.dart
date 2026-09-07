@@ -32,6 +32,18 @@ class SyncProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<List<Map<String, dynamic>>> getPendingRecordsList() async {
+    final db = await DatabaseHelper.instance.database;
+    final List<Map<String, dynamic>> result = await db.rawQuery('''
+      SELECT r.idRegistro, r.dataColeta, a.nomeAluno 
+      FROM registros_coleta r
+      INNER JOIN alunos a ON r.idAluno = a.idAluno
+      WHERE r.statusSincronizacao = 'PENDENTE'
+      ORDER BY r.dataColeta DESC
+    ''');
+    return result;
+  }
+
   Future<void> syncData() async {
     if (_pendingCount == 0) return;
 

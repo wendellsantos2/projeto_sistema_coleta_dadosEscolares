@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/sync_provider.dart';
 import 'coleta_form_screen.dart';
+import 'pendentes_screen.dart';
 import '../../core/database_helper.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -64,6 +65,12 @@ class DashboardScreen extends StatelessWidget {
                             value: syncProvider.pendingCount.toString(),
                             icon: Icons.cloud_upload,
                             color: syncProvider.pendingCount > 0 ? Colors.orange : Colors.green,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const PendentesScreen()),
+                              );
+                            },
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -163,35 +170,42 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusCard(BuildContext context, {required String title, required String value, required IconData icon, required Color color}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
+  Widget _buildStatusCard(BuildContext context, {required String title, required String value, required IconData icon, required Color color, VoidCallback? onTap}) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: color, size: 32),
+              const SizedBox(height: 12),
+              Text(
+                value,
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                title,
+                style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
-          Text(
-            title,
-            style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w500),
-          ),
-        ],
+        ),
       ),
     );
   }
