@@ -136,6 +136,24 @@ class DashboardScreen extends StatelessWidget {
                           color: Colors.redAccent,
                           onTap: () => _showDeleteConfirmation(context),
                         ),
+                        _buildActionCard(
+                          context,
+                          title: syncProvider.autoSyncEnabled ? 'Auto-Sync: ON' : 'Auto-Sync: OFF',
+                          icon: syncProvider.autoSyncEnabled ? Icons.autorenew : Icons.sync_disabled,
+                          color: syncProvider.autoSyncEnabled ? Colors.teal : Colors.grey,
+                          onTap: () {
+                            syncProvider.toggleAutoSync(!syncProvider.autoSyncEnabled);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  syncProvider.autoSyncEnabled
+                                      ? 'Sincronização automática ativada (a cada 30s).'
+                                      : 'Sincronização automática desativada.',
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ],

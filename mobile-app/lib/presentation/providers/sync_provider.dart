@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
+import 'dart:async';
 import '../../data/sync_service.dart';
 import '../../core/database_helper.dart';
 
@@ -8,10 +9,13 @@ class SyncProvider extends ChangeNotifier {
   bool _isSyncing = false;
   int _pendingCount = 0;
   int _totalCount = 0;
+  bool _autoSyncEnabled = false;
+  Timer? _syncTimer;
 
   bool get isSyncing => _isSyncing;
   int get pendingCount => _pendingCount;
   int get totalCount => _totalCount;
+  bool get autoSyncEnabled => _autoSyncEnabled;
 
   Future<void> checkPending() async {
     final db = await DatabaseHelper.instance.database;
@@ -55,5 +59,27 @@ class SyncProvider extends ChangeNotifier {
       await txn.delete('familias');
     });
     await checkPending();
+  }
+
+  void toggleAutoSync(bool value) {
+    _autoSyncEnabled = value;
+    if (_autoSyncEnabled) {
+      _syncTimer?.cancel();
+      _syncTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+        if (!_isSyncing && _pendingCount > 0) {
+          syncData();
+        }
+      });
+    } else {
+      _syncTimer?.cancel();
+      _syncTimer = null;
+    }
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _syncTimer?.cancel();
+    super.dispose();
   }
 }
