@@ -165,13 +165,7 @@ class DashboardScreen extends StatelessWidget {
                                   );
                                 },
                         ),
-                        _buildActionCard(
-                          context,
-                          title: 'Apagar Dados',
-                          icon: Icons.delete_sweep,
-                          color: Colors.red.shade400,
-                          onTap: () => _showDeleteConfirmation(context),
-                        ),
+
                         _buildActionCard(
                           context,
                           title: syncProvider.autoSyncEnabled ? 'Auto-Sync: ON' : 'Auto-Sync: OFF',
@@ -283,35 +277,5 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _showDeleteConfirmation(BuildContext context) async {
-    final bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar exclusão'),
-          content: const Text('Tem certeza que deseja APAGAR TODOS os dados coletados localmente no dispositivo? Essa ação não pode ser desfeita.'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Sim, Apagar Tudo', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        );
-      },
-    );
 
-    if (confirm == true && context.mounted) {
-      await context.read<SyncProvider>().clearAllData();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Todos os dados locais foram excluídos.')),
-        );
-      }
-    }
-  }
 }
