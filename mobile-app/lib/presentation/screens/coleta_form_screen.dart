@@ -18,14 +18,29 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
 
   // Form controllers
   final _nomeAlunoController = TextEditingController();
+  final _cpfAlunoController = TextEditingController();
   final _dataNascController = TextEditingController();
+  final _descNecessidadeController = TextEditingController();
   final _nomeRespController = TextEditingController();
   final _cpfRespController = TextEditingController();
+  final _telefoneRespController = TextEditingController();
+  final _emailRespController = TextEditingController();
   final _parentescoController = TextEditingController();
   final _enderecoController = TextEditingController();
   final _bairroController = TextEditingController();
   final _comunidadeController = TextEditingController();
+  final _qtdMoradoresController = TextEditingController();
   final _rendaController = TextEditingController();
+  final _beneficioDescController = TextEditingController();
+  final _tipoInternetController = TextEditingController();
+  
+  final _anoSerieController = TextEditingController();
+  final _meioTransporteController = TextEditingController();
+  final _tempoDeslocamentoController = TextEditingController();
+  final _frequenciaController = TextEditingController();
+
+  String _sexo = 'M';
+  String _turno = 'Matutino';
   
   bool _recebeBeneficio = false;
   bool _necessidadeEspecial = false;
@@ -65,8 +80,19 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                 _comunidadeController.text = 'Comunidade Y';
                 _rendaController.text = '1500';
                 _recebeBeneficio = true;
-                _necessidadeEspecial = false;
-                _possuiInternet = true;
+                _cpfAlunoController.text = '${rng.nextInt(900) + 100}${rng.nextInt(900) + 100}${rng.nextInt(900) + 100}11';
+                _descNecessidadeController.text = '';
+                _telefoneRespController.text = '92999999999';
+                _emailRespController.text = 'mock@email.com';
+                _qtdMoradoresController.text = '4';
+                _beneficioDescController.text = 'Bolsa Família';
+                _tipoInternetController.text = 'Wi-Fi / Fibra';
+                _anoSerieController.text = '5º Ano Fundamental';
+                _meioTransporteController.text = 'Ônibus';
+                _tempoDeslocamentoController.text = '30';
+                _frequenciaController.text = '90';
+                _sexo = 'M';
+                _turno = 'Matutino';
               });
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Formulario preenchido com mock!')),
@@ -89,6 +115,8 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                       icon: Icons.person,
                       children: [
                         _buildTextField(_nomeAlunoController, 'Nome do Aluno', Icons.badge),
+                        _buildTextField(_cpfAlunoController, 'CPF do Aluno', Icons.badge),
+                        _buildDropdown('Sexo', _sexo, ['M', 'F'], (val) => setState(() => _sexo = val!)),
                         _buildTextField(_dataNascController, 'Data de Nascimento (YYYY-MM-DD)', Icons.calendar_today),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
@@ -97,6 +125,20 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                           onChanged: (v) => setState(() => _necessidadeEspecial = v),
                           activeColor: Colors.deepPurple,
                         ),
+                        if (_necessidadeEspecial)
+                          _buildTextField(_descNecessidadeController, 'Descrição da Necessidade', Icons.healing),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _buildSectionCard(
+                      title: 'Escolaridade e Transporte',
+                      icon: Icons.school,
+                      children: [
+                        _buildTextField(_anoSerieController, 'Ano/Série', Icons.grade),
+                        _buildDropdown('Turno', _turno, ['Matutino', 'Vespertino', 'Noturno', 'Integral'], (val) => setState(() => _turno = val!)),
+                        _buildTextField(_frequenciaController, 'Frequência Escolar (%)', Icons.percent, keyboardType: TextInputType.number),
+                        _buildTextField(_meioTransporteController, 'Meio de Transporte', Icons.directions_bus),
+                        _buildTextField(_tempoDeslocamentoController, 'Tempo Deslocamento (Min)', Icons.timer, keyboardType: TextInputType.number),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -107,6 +149,8 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                         _buildTextField(_nomeRespController, 'Nome do Responsável', Icons.person_outline),
                         _buildTextField(_cpfRespController, 'CPF do Responsável', Icons.credit_card),
                         _buildTextField(_parentescoController, 'Parentesco (Ex: Mãe, Pai)', Icons.family_restroom),
+                        _buildTextField(_telefoneRespController, 'Telefone', Icons.phone, keyboardType: TextInputType.phone),
+                        _buildTextField(_emailRespController, 'Email', Icons.email, keyboardType: TextInputType.emailAddress, isRequired: false),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -116,7 +160,8 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                       children: [
                         _buildTextField(_enderecoController, 'Endereço', Icons.location_on),
                         _buildTextField(_bairroController, 'Bairro', Icons.map),
-                        _buildTextField(_comunidadeController, 'Comunidade', Icons.location_city),
+                        _buildTextField(_comunidadeController, 'Comunidade', Icons.location_city, isRequired: false),
+                        _buildTextField(_qtdMoradoresController, 'Qtd de Moradores na Casa', Icons.people, keyboardType: TextInputType.number),
                         _buildTextField(
                           _rendaController,
                           'Renda Familiar Mensal (R\$)',
@@ -130,6 +175,8 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                           onChanged: (v) => setState(() => _recebeBeneficio = v),
                           activeColor: Colors.deepPurple,
                         ),
+                        if (_recebeBeneficio)
+                          _buildTextField(_beneficioDescController, 'Qual Benefício?', Icons.card_giftcard),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
                           title: const Text('Possui Internet em Casa?'),
@@ -137,6 +184,8 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
                           onChanged: (v) => setState(() => _possuiInternet = v),
                           activeColor: Colors.deepPurple,
                         ),
+                        if (_possuiInternet)
+                          _buildTextField(_tipoInternetController, 'Tipo de Acesso (Wi-Fi, 4G, etc)', Icons.wifi),
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -187,7 +236,27 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {TextInputType? keyboardType}) {
+  Widget _buildDropdown(String label, String value, List<String> items, Function(String?) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: DropdownButtonFormField<String>(
+        value: value,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: Colors.grey.shade100,
+        ),
+        items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {TextInputType? keyboardType, bool isRequired = true}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextFormField(
@@ -203,7 +272,10 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
           fillColor: Colors.grey.shade100,
         ),
         keyboardType: keyboardType,
-        validator: (val) => val == null || val.trim().isEmpty ? 'Obrigatório' : null,
+        validator: (val) {
+          if (isRequired && (val == null || val.trim().isEmpty)) return 'Obrigatório';
+          return null;
+        },
       ),
     );
   }
@@ -230,12 +302,12 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
         'endereco': _enderecoController.text,
         'bairro': _bairroController.text,
         'comunidade': _comunidadeController.text,
-        'qtdMoradores': 3, // mock
+        'qtdMoradores': int.tryParse(_qtdMoradoresController.text) ?? 1,
         'rendaFamiliarMensal': double.tryParse(_rendaController.text) ?? 0.0,
         'recebeBeneficioSocial': _recebeBeneficio ? 1 : 0,
-        'beneficioSocial': _recebeBeneficio ? 'Bolsa Familia' : null, // mock
+        'beneficioSocial': _recebeBeneficio ? _beneficioDescController.text : null,
         'possuiInternetCasa': _possuiInternet ? 1 : 0,
-        'tipoAcessoInternet': _possuiInternet ? 'Banda Larga' : null, // mock
+        'tipoAcessoInternet': _possuiInternet ? _tipoInternetController.text : null,
       });
 
       // Responsavel
@@ -243,8 +315,8 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
         'idResponsavel': idResponsavel,
         'nomeResponsavel': _nomeRespController.text,
         'cpfResponsavel': _cpfRespController.text,
-        'telefoneResponsavel': '00000000000', // mock
-        'emailResponsavel': '',
+        'telefoneResponsavel': _telefoneRespController.text,
+        'emailResponsavel': _emailRespController.text,
       });
 
       // Aluno
@@ -253,10 +325,10 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
         'idFamilia': idFamilia,
         'nomeAluno': _nomeAlunoController.text,
         'dataNascimento': _dataNascController.text,
-        'sexo': 'M', // mock
-        'cpfAluno': '${Random().nextInt(900) + 100}${Random().nextInt(900) + 100}${Random().nextInt(900) + 100}${Random().nextInt(90) + 10}',
+        'sexo': _sexo,
+        'cpfAluno': _cpfAlunoController.text,
         'necessidadeEducacionalEspecial': _necessidadeEspecial ? 1 : 0,
-        'descricaoNecessidade': '',
+        'descricaoNecessidade': _necessidadeEspecial ? _descNecessidadeController.text : '',
       });
 
       // Vinculo Aluno Responsavel
@@ -271,11 +343,11 @@ class _ColetaFormScreenState extends State<ColetaFormScreen> {
         'idMatricula': idMatricula,
         'idAluno': idAluno,
         'anoLetivo': 2026,
-        'anoSerie': '1 ano Ensino Medio', // mock
-        'turno': 'Matutino', // mock
-        'frequenciaEscolarPct': 100.0, // mock
-        'meioTransporteEscola': 'Onibus Escolar', // mock
-        'tempoDeslocamentoMin': 30, // mock
+        'anoSerie': _anoSerieController.text,
+        'turno': _turno,
+        'frequenciaEscolarPct': double.tryParse(_frequenciaController.text) ?? 0.0,
+        'meioTransporteEscola': _meioTransporteController.text,
+        'tempoDeslocamentoMin': int.tryParse(_tempoDeslocamentoController.text) ?? 0,
       });
 
       // Registro de Coleta
