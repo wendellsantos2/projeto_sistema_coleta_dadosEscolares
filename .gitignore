@@ -1,9 +1,1 @@
 .idea/
-*.pem
-.env
-bin/
-obj/
-node_modules/
-dist/
-app-release.apk
-apks/
