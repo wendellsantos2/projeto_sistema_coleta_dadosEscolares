@@ -1,5 +1,7 @@
 # Sistema de Coleta de Dados Escolares
 
+> 🌐 **Acesse o Sistema Online:** [https://vercel-sistema-escolar.vercel.app/](https://vercel-sistema-escolar.vercel.app/)
+
 Solucao completa para coleta, armazenamento, sincronizacao e visualizacao de dados
 socioeconomicos de alunos e suas familias, desenvolvida como teste tecnico.
 
