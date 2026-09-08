@@ -1,4 +1,4 @@
-﻿# Sistema de Coleta de Dados Escolares
+# Sistema de Coleta de Dados Escolares
 
 Solucao completa para coleta, armazenamento, sincronizacao e visualizacao de dados
 socioeconomicos de alunos e suas familias, desenvolvida como teste tecnico.
@@ -12,6 +12,15 @@ O APK da aplicação mobile já foi gerado e está disponível diretamente na ra
 - [app-release.apk](app-release.apk)
 
 Baixe o arquivo e instale no dispositivo Android.
+
+---
+
+## 0.1. Deploy Web
+
+O painel web-admin está publicado na Vercel e pode ser acessado pelo endereço:
+
+- **Acessar o Painel Web:** [https://vercel-sistema-escolar.vercel.app/](https://vercel-sistema-escolar.vercel.app/)
+- [Gerenciar deployment na Vercel](https://vercel.com/wendellsantos2s-projects/web-admin/BqEoSZQ3sHuqVBppEms3jYUMbLoh)
 
 ---
 
