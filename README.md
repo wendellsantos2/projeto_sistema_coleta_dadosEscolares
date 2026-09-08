@@ -5,6 +5,16 @@ socioeconomicos de alunos e suas familias, desenvolvida como teste tecnico.
 
 ---
 
+## 0. APK do App
+
+O APK da aplicação mobile já foi gerado e está disponível diretamente na raiz do projeto:
+
+- [app-release.apk](app-release.apk)
+
+Baixe o arquivo e instale no dispositivo Android.
+
+---
+
 ## 1. Arquitetura
 
 ```

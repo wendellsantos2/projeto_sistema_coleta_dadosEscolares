@@ -11,8 +11,43 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # Mapeia a pasta database/init.sql para que o PostgreSQL rode esse script ao subir a primeira vez
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d coleta_escolar"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: coleta_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=coleta_escolar;Username=postgres;Password=password
+      JwtSettings__SecretKey: coleta-escolar-chave-secreta-jwt-2026-muito-longa-e-segura
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: /api
+    container_name: coleta_frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
     restart: unless-stopped
 
 volumes:

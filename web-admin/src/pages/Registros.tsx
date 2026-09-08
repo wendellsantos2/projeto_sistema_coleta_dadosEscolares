@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { ArrowLeft, CheckCircle, Clock, Eye, X, FileText, Download, Table } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Eye, X, FileText, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 

@@ -180,7 +180,7 @@ export default function Dashboard() {
                   nameKey="turno"
                   labelLine={false}
                 >
-                  {data.distribuicaoTurno.map((entry: any, index: number) => (
+                  {data.distribuicaoTurno.map((_: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -207,7 +207,7 @@ export default function Dashboard() {
                   nameKey="beneficio"
                   labelLine={false}
                 >
-                  {data.distribuicaoBeneficios.map((entry: any, index: number) => (
+                  {data.distribuicaoBeneficios.map((_: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />
                   ))}
                 </Pie>
