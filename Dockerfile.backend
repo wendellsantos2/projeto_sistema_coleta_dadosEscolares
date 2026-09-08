@@ -1,0 +1,30 @@
+# Estagio 1: Build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY BackendApi/WebApi/WebApi.csproj           WebApi/
+COPY BackendApi/Application/Application.csproj Application/
+COPY BackendApi/Entities/Entities.csproj       Entities/
+COPY BackendApi/Infra/Infra.csproj             Infra/
+
+RUN dotnet restore WebApi/WebApi.csproj
+
+COPY BackendApi/WebApi/       WebApi/
+COPY BackendApi/Application/  Application/
+COPY BackendApi/Entities/     Entities/
+COPY BackendApi/Infra/        Infra/
+
+RUN dotnet publish WebApi/WebApi.csproj -c Release -o /app/publish --no-restore
+
+# Estagio 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+
+COPY --from=build /app/publish .
+
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "WebApi.dll"]
